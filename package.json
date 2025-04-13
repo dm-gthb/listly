@@ -2,6 +2,7 @@
   "name": "listly",
   "private": true,
   "type": "module",
+	"author": "Dmitrii Mamonov",
   "scripts": {
     "build": "react-router build",
     "cf-typegen": "wrangler types",
@@ -12,6 +13,7 @@
     "format": "prettier --write \"**/*.+(js|ts|tsx|json|css|html)\""
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "isbot": "^5.1.17",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

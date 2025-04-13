@@ -14,3 +14,21 @@ body {
     color-scheme: dark;
   }
 }
+
+@layer components {
+  .global-container {
+    @apply mx-auto max-w-7xl px-8;
+  }
+
+  .title {
+    @apply mb-3 text-3xl font-bold;
+  }
+
+  .button-base {
+    @apply w-full cursor-pointer rounded-full bg-gray-200 p-3 text-center transition-colors hover:bg-gray-300 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-400;
+  }
+
+  .button-file {
+    @apply flex w-fit cursor-pointer items-center rounded-full border border-gray-600 px-8 py-2;
+  }
+}

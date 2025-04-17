@@ -10,9 +10,18 @@
 	"vars": {
 		"VALUE_FROM_CLOUDFLARE": "Hello from Cloudflare"
 	},
-	"observability": {
-		"enabled": true
-	}
+  "observability": {
+    "enabled": true,
+  },
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "listly",
+      "database_id": "36bb15f8-6556-4f9c-a277-814433f95620",
+      "migrations_dir": "./drizzle/migrations",
+    },
+  ],
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

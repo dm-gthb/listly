@@ -1,6 +1,9 @@
 .DS_Store
 /node_modules/
 *.tsbuildinfo
+/local/
+.local
+.env
 
 # React Router
 /.react-router/
@@ -11,3 +14,6 @@
 .wrangler
 .dev.vars*
 
+# db
+/drizzle/seed.sql
+/drizzle/seed.ts

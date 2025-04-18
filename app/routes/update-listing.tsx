@@ -1,4 +1,4 @@
-export default function UpdateOffer() {
+export default function UpdateListing() {
   return (
     <>
       <h1 className="title mb-6 text-center">Edit Item</h1>

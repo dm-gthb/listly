@@ -1,6 +1,6 @@
 import type { Route } from './+types/home';
 import { Categories } from '~/components/categories';
-import { OffersGrid } from '~/components/offers-grid';
+import { ListingsGrid } from '~/components/listings-grid';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -39,7 +39,7 @@ function OffersSection({ title, items }: { title: string; items: {}[] }) {
   return (
     <section className="mb-8">
       <h2 className="title">{title}</h2>
-      <OffersGrid />
+      <ListingsGrid />
     </section>
   );
 }

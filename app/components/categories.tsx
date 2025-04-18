@@ -11,7 +11,7 @@ export function Categories({
       {categories.map(({ id, name }) => (
         <li key={id}>
           <Link
-            to={`${appRoute.categoryOffers}/${id}`}
+            to={`${appRoute.categoryListings}/${id}`}
             className="group block min-w-[100px] pb-4 text-center"
           >
             <div className="mb-2 overflow-hidden rounded-full group-hover:opacity-80">

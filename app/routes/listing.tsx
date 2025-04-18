@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { Comment } from '~/components/comment';
 import { CreateComment } from '~/components/create-comment';
 
-export default function Offer() {
+export default function Listing() {
   return (
     <>
       <div className="mb-4 flex flex-col gap-8 pb-8 md:flex-row">

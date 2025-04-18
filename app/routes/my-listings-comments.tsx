@@ -1,6 +1,6 @@
 import { Comment } from '~/components/comment';
 
-export default function MyOfferComments() {
+export default function MyListingsComments() {
   return (
     <div>
       <section className="mb-10">

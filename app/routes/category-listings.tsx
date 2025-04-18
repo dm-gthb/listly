@@ -1,11 +1,11 @@
-import { OffersGrid } from '~/components/offers-grid';
+import { ListingsGrid } from '~/components/listings-grid';
 import { Pagination } from '~/components/pagination';
 
-export default function CategoryOffers() {
+export default function CategoryListings() {
   return (
     <>
       <h1 className="title">Category</h1>
-      <OffersGrid />
+      <ListingsGrid />
       <div className="flex justify-center p-8">
         <Pagination />
       </div>

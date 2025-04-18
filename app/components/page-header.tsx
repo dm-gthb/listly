@@ -36,15 +36,15 @@ export function PageHeader() {
           <div className="flex items-center gap-6 sm:gap-8 md:gap-10">
             {user && (
               <>
-                <NavLink to={appRoute.createOffer}>
+                <NavLink to={appRoute.createListing}>
                   <FolderPlusIcon width={24} height={24} />
                   <span className="sr-only">Add listing</span>
                 </NavLink>
-                <NavLink to={appRoute.myOffers}>
+                <NavLink to={appRoute.myListings}>
                   <DocumentDuplicateIcon width={24} height={24} />
                   <span className="sr-only">My listings</span>
                 </NavLink>
-                <NavLink to={appRoute.myOfferComments}>
+                <NavLink to={appRoute.myListingComments}>
                   <ChatBubbleLeftIcon width={24} height={24} />
                   <span className="sr-only">Comments</span>
                 </NavLink>

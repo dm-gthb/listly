@@ -1,6 +1,6 @@
 import { Form } from 'react-router';
 
-export default function CreateOffer() {
+export default function CreateListing() {
   return (
     <>
       <h1 className="title mb-6 text-center">New Item</h1>

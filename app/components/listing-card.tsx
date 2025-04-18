@@ -1,10 +1,10 @@
 import { Link } from 'react-router';
 import { appRoute } from '~/routes';
 
-export function OfferCard() {
+export function ListingCard() {
   return (
     <div className="overflow-hidden rounded-lg bg-gray-50 shadow transition-opacity hover:opacity-90">
-      <Link to={`${appRoute.offer}/1`} className="block">
+      <Link to={`${appRoute.listing}/1`} className="block">
         <div className="aspect-square">
           <img
             className="block h-full w-full object-cover"

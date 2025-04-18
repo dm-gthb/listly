@@ -1,11 +1,11 @@
 import { Link } from 'react-router';
 import { appRoute } from '~/routes';
 
-export function EditOfferCard() {
+export function EditListingCard() {
   return (
     <div className="overflow-hidden rounded-lg bg-gray-50 shadow">
       <Link
-        to={`${appRoute.updateOffer}/1`}
+        to={`${appRoute.updateListing}/1`}
         className="block transition-opacity hover:opacity-90"
       >
         <div className="aspect-square">
@@ -27,7 +27,7 @@ export function EditOfferCard() {
         </div>
       </Link>
       <Link
-        to={`${appRoute.updateOffer}/1`}
+        to={`${appRoute.updateListing}/1`}
         className="block w-full cursor-pointer bg-gray-600 p-2 text-center font-bold text-white transition-opacity hover:opacity-80"
       >
         Edit

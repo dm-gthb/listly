@@ -17,3 +17,4 @@
 # db
 /drizzle/seed.sql
 /drizzle/seed.ts
+/drizzle/migrations/meta/_journal.json

@@ -10,7 +10,7 @@ export default function Offer() {
           <img
             src="https://placehold.co/1200x800"
             alt=""
-            className="max-h-full max-w-full text-center"
+            className="max-h-full max-w-full object-contain text-center"
           />
         </div>
 
@@ -26,6 +26,9 @@ export default function Offer() {
 
           <p>
             <span className="font-bold">Date of posting:</span> <span>2024/10/10</span>
+          </p>
+          <p>
+            <span className="font-bold">Condition:</span> <span>new</span>
           </p>
           <p>
             <span className="font-bold">Author:</span> <span>Name Surname</span>

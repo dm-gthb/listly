@@ -26,6 +26,12 @@ export function EditOfferCard() {
           </span>
         </div>
       </Link>
+      <Link
+        to={`${appRoute.updateOffer}/1`}
+        className="block w-full cursor-pointer bg-gray-600 p-2 text-center font-bold text-white transition-opacity hover:opacity-80"
+      >
+        Edit
+      </Link>
       <button
         onClick={() => console.log('delete')}
         className="w-full cursor-pointer bg-red-600 p-2 font-bold text-white transition-opacity hover:opacity-80"

@@ -1,6 +1,12 @@
+import * as NavigationMenu from '@radix-ui/react-navigation-menu';
 import type { Route } from './+types/home';
-import { Categories } from '~/components/categories';
 import { ListingsGrid } from '~/components/listings-grid';
+import { getDB } from '~/utils/drizzle';
+import type { categories } from 'drizzle/schema';
+import { Link } from 'react-router';
+import { appRoute } from '~/routes';
+
+type Category = typeof categories.$inferSelect;
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -9,37 +15,73 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export function loader({ context }: Route.LoaderArgs) {
-  return {
-    categories: [
-      { id: 0, name: 'electronics' },
-      { id: 1, name: 'books' },
-      { id: 2, name: 'games' },
-      { id: 3, name: 'clothing' },
-      { id: 4, name: 'cars' },
-      { id: 5, name: 'other' },
-    ],
-  };
+export async function loader({ context }: Route.LoaderArgs) {
+  const db = getDB(context.cloudflare.env.DB);
+  const categories = await db.query.categories.findMany();
+  const latestListings = await db.query.listings.findMany({
+    orderBy: (listings, { asc }) => [asc(listings.createdAt)],
+    limit: 8,
+  });
+  return { categories, latestListings };
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
   const { categories } = loaderData;
+  const groupedCategories = getGroupedCategories(categories);
   return (
     <>
       <div className="mb-8">
-        <Categories categories={categories} />
+        <CategoriesMenu categories={groupedCategories} />
       </div>
-      <OffersSection title="Most recent" items={[]} />
-      <OffersSection title="Most popular" items={[]} />
+      <section className="mb-8">
+        <h2 className="title">Latest Listings</h2>
+        <ListingsGrid />
+      </section>
     </>
   );
 }
 
-function OffersSection({ title, items }: { title: string; items: {}[] }) {
+function getGroupedCategories(categories: Category[]) {
+  const parents = categories.filter((category) => !category.parentId);
+  const children = categories.filter((category) => category.parentId);
+  return parents.map((parent) => ({
+    ...parent,
+    children: children.filter(({ parentId }) => parentId === parent.id),
+  }));
+}
+
+function CategoriesMenu({
+  categories,
+}: {
+  categories: Array<Category & { children: Array<Category> }>;
+}) {
   return (
-    <section className="mb-8">
-      <h2 className="title">{title}</h2>
-      <ListingsGrid />
-    </section>
+    <NavigationMenu.Root className="relative flex">
+      <NavigationMenu.List className="flex flex-wrap rounded p-1">
+        {categories.map((parentCategory) => {
+          return (
+            <NavigationMenu.Item key={parentCategory.id} className="relative shrink-0">
+              <NavigationMenu.Trigger className="mr-2 mb-2 rounded-md bg-gray-200 px-4 py-2 transition-colors hover:bg-gray-300">
+                {parentCategory.name}
+              </NavigationMenu.Trigger>
+              <NavigationMenu.Content className="absolute top-10 left-0 z-1 w-max min-w-full rounded-md bg-white p-4 shadow-xl">
+                <ul className="shrink-0">
+                  {parentCategory.children.map(({ id, name }) => (
+                    <li key={id}>
+                      <Link
+                        className="inline-block cursor-pointer px-2 py-1.5 hover:underline"
+                        to={`${appRoute.categoryListings}/${id}`}
+                      >
+                        {name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </NavigationMenu.Content>
+            </NavigationMenu.Item>
+          );
+        })}
+      </NavigationMenu.List>
+    </NavigationMenu.Root>
   );
 }

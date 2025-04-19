@@ -75,9 +75,9 @@ export async function action({ request, context, params }: Route.ActionArgs) {
   await db
     .update(listings)
     .set({
-      title: title as string,
-      description: description as string,
-      sum: +sum as number,
+      title,
+      description,
+      sum,
       updatedAt: new Date().toISOString(),
     })
     .where(eq(listings.id, +listingId));

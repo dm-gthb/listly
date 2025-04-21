@@ -25,7 +25,7 @@ body {
   }
 
   .button-base {
-    @apply w-full cursor-pointer rounded-full bg-gray-200 p-3 text-center transition-colors hover:bg-gray-300 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-400;
+    @apply w-full cursor-pointer rounded-full bg-gray-200 px-10 py-3 text-center capitalize transition-colors hover:bg-gray-300 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-400;
   }
 
   .button-file {

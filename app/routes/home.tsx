@@ -1,12 +1,11 @@
 import * as NavigationMenu from '@radix-ui/react-navigation-menu';
 import type { Route } from './+types/home';
 import { ListingsGrid } from '~/components/listings-grid';
-import { getDB } from '~/utils/drizzle';
-import type { categories } from 'drizzle/schema';
+import { db } from '~/utils/db';
 import { Link } from 'react-router';
 import { appRoute } from '~/routes';
-
-type Category = typeof categories.$inferSelect;
+import type { Category } from 'drizzle/types';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -15,10 +14,10 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export async function loader({ context }: Route.LoaderArgs) {
-  const db = getDB(context.cloudflare.env.DB);
+export async function loader() {
   const categories = await db.query.categories.findMany();
   const latestListings = await db.query.listings.findMany({
+    with: { categories: true },
     orderBy: (listings, { asc }) => [asc(listings.createdAt)],
     limit: 8,
   });
@@ -26,16 +25,18 @@ export async function loader({ context }: Route.LoaderArgs) {
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-  const { categories } = loaderData;
+  const { categories, latestListings } = loaderData;
   const groupedCategories = getGroupedCategories(categories);
   return (
     <>
-      <div className="mb-8">
-        <CategoriesMenu categories={groupedCategories} />
+      <div className="relative -mt-6 mb-6 flex items-center justify-items-start gap-8">
+        <div className="">
+          <SelectedCategoriesMenu categories={groupedCategories} />
+        </div>
       </div>
       <section className="mb-8">
         <h2 className="title">Latest Listings</h2>
-        <ListingsGrid />
+        <ListingsGrid listings={latestListings} />
       </section>
     </>
   );
@@ -50,26 +51,36 @@ function getGroupedCategories(categories: Category[]) {
   }));
 }
 
-function CategoriesMenu({
+function SelectedCategoriesMenu({
   categories,
 }: {
   categories: Array<Category & { children: Array<Category> }>;
 }) {
   return (
-    <NavigationMenu.Root className="relative flex">
-      <NavigationMenu.List className="flex flex-wrap rounded p-1">
+    <NavigationMenu.Root className="relative flex" delayDuration={100}>
+      <NavigationMenu.List className="flex flex-wrap gap-x-6 rounded lg:gap-x-8 xl:gap-x-10">
         {categories.map((parentCategory) => {
+          if (parentCategory.children.length === 0) {
+            return null;
+          }
+
           return (
             <NavigationMenu.Item key={parentCategory.id} className="relative shrink-0">
-              <NavigationMenu.Trigger className="mr-2 mb-2 rounded-md bg-gray-200 px-4 py-2 transition-colors hover:bg-gray-300">
+              <NavigationMenu.Trigger className="group transition-color flex items-center gap-1 py-3.5">
                 {parentCategory.name}
+                <ChevronDownIcon
+                  className="rotate-0 transition-transform group-data-[state=open]:rotate-180"
+                  width={12}
+                  hanging={12}
+                  strokeWidth={3}
+                />
               </NavigationMenu.Trigger>
-              <NavigationMenu.Content className="absolute top-10 left-0 z-1 w-max min-w-full rounded-md bg-white p-4 shadow-xl">
+              <NavigationMenu.Content className="absolute top-10 -left-4 z-1 w-max min-w-[calc(100%+32px)] rounded-md bg-white px-2 py-2 shadow-xl">
                 <ul className="shrink-0">
                   {parentCategory.children.map(({ id, name }) => (
                     <li key={id}>
                       <Link
-                        className="inline-block cursor-pointer px-2 py-1.5 hover:underline"
+                        className="block cursor-pointer px-2 py-1.5 hover:underline"
                         to={`${appRoute.categoryListings}/${id}`}
                       >
                         {name}

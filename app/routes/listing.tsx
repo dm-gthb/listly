@@ -1,50 +1,85 @@
-import { Link } from 'react-router';
-import { Comment } from '~/components/comment';
-import { CreateComment } from '~/components/create-comment';
+import type { Route } from './+types/listing';
+import { db } from '~/utils/db';
+import { formatDate } from '~/utils/misc';
 
-export default function Listing() {
+export async function loader({ params }: Route.LoaderArgs) {
+  const id = params.listingId;
+  if (id === undefined) {
+    throw new Response('No listingId param', { status: 400 });
+  }
+
+  const listing = await db.query.listings.findFirst({
+    where: (lisings, { eq }) => eq(lisings.id, +id),
+    with: {
+      categories: {
+        with: {
+          category: true,
+        },
+      },
+      comments: true,
+    },
+  });
+
+  if (!listing) {
+    throw new Response('Listing not found', { status: 404 });
+  }
+
+  const listingWithNormalizedCategories = {
+    ...listing,
+    categories: listing.categories.map(({ category }) => category),
+  };
+
+  return { listing: listingWithNormalizedCategories };
+}
+
+export default function Listing({ loaderData }: Route.ComponentProps) {
+  const {
+    listing: { title, description, images, sum, createdAt, condition, categories },
+  } = loaderData;
   return (
     <>
-      <div className="mb-4 flex flex-col gap-8 pb-8 md:flex-row">
-        <div className="flex h-[500px] w-full shrink-0 justify-center overflow-hidden rounded-xl bg-stone-100 text-center md:w-1/2">
+      <div className="mb-4 flex flex-col gap-8 pb-8 lg:flex-row">
+        <div className="flex h-[500px] w-full shrink-0 justify-center overflow-hidden rounded-xl bg-stone-100 text-center lg:w-2/3">
           <img
-            src="https://placehold.co/1200x800"
-            alt=""
+            src={images[0]}
+            alt={`${title} image`}
             className="max-h-full max-w-full object-contain text-center"
           />
         </div>
-
         <div>
-          <h1 className="title">Lorem ipsum dolor sit amet</h1>
-          <span className="title block">$1000</span>
-          <p className="mb-4">
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Sit inventore
-            assumenda vitae accusamus quos debitis veniam reprehenderit eveniet eius
-            minima, adipisci tempore sunt dolorum molestias expedita repellat distinctio
-            mollitia consectetur? Deleniti aut vel mollitia ipsa!
-          </p>
-
-          <p>
-            <span className="font-bold">Date of posting:</span> <span>2024/10/10</span>
-          </p>
-          <p>
-            <span className="font-bold">Condition:</span> <span>new</span>
-          </p>
-          <p>
-            <span className="font-bold">Author:</span> <span>Name Surname</span>
-          </p>
-          <p>
-            <span className="font-bold">Contact:</span> <span>namesurname@gmail.com</span>
-          </p>
-          <ul className="flex gap-2">
-            <Link to="/">categorylink</Link>
-            <Link to="/">categorylink</Link>
-            <Link to="/">categorylink</Link>
-          </ul>
+          <h1 className="title mb-2">{title}</h1>
+          <p className="title mb-6">US ${sum}</p>
+          <button className="button-base mb-3 bg-blue-600 font-bold text-white hover:bg-blue-500">
+            Add To Cart
+          </button>
+          <button className="button-base mb-3">add to watchlist</button>
+          <button className="button-base mb-6">show contacts</button>
         </div>
       </div>
 
-      <h3 className="title">Comments</h3>
+      <h2 className="title">Description from the seller</h2>
+      <p className="mb-8">{description}</p>
+      <h2 className="title">Item specifics</h2>
+      <table className="mb-8">
+        <th className="sr-only">
+          <th className="pr-2">Property</th>
+          <th>Value</th>
+        </th>
+        <tr>
+          <td className="pr-4 text-gray-600">Condition</td>
+          <td className="capitalize">{condition}</td>
+        </tr>
+        <tr>
+          <td className="pr-4 text-gray-600">Categories</td>
+          <td>{categories.map(({ name }) => name).join(', ')}</td>
+        </tr>
+        <tr>
+          <td className="pr-4 text-gray-600">Posted</td>
+          <td>{formatDate(createdAt)}</td>
+        </tr>
+      </table>
+
+      {/* <h3 className="title">Comments</h3>
       <CreateComment />
       <ul className="flex flex-col gap-10">
         {new Array(10).fill('').map((comment, i) => (
@@ -52,7 +87,7 @@ export default function Listing() {
             <Comment />
           </li>
         ))}
-      </ul>
+      </ul> */}
     </>
   );
 }

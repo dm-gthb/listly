@@ -5,7 +5,7 @@ export default function CategoryListings() {
   return (
     <>
       <h1 className="title">Category</h1>
-      <ListingsGrid />
+      <ListingsGrid listings={[]} />
       <div className="flex justify-center p-8">
         <Pagination />
       </div>

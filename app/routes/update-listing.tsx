@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { getZodConstraint, parseWithZod } from '@conform-to/zod';
-import { getDB } from '~/utils/drizzle';
+import { db } from '~/utils/db';
 import type { Route } from './+types/update-listing';
 import { listings, listingToCategory } from 'drizzle/schema';
 import { eq } from 'drizzle-orm';
@@ -18,13 +18,11 @@ import { FormErrorList } from '~/components/form-error-list';
 const titleMaxLength = 100;
 const descriptionMaxLength = 500;
 
-export async function loader({ context, params }: Route.LoaderArgs) {
+export async function loader({ params }: Route.LoaderArgs) {
   const id = params.listingId;
   if (id === undefined) {
     throw new Response('No listingId param', { status: 400 });
   }
-
-  const db = getDB(context.cloudflare.env.DB);
 
   const listing = await db.query.listings.findFirst({
     where: (lisings, { eq }) => eq(lisings.id, +id),
@@ -71,7 +69,6 @@ export async function action({ request, context, params }: Route.ActionArgs) {
 
   const { title, description, sum, categoryId } = submission.value;
 
-  const db = getDB(context.cloudflare.env.DB);
   await db
     .update(listings)
     .set({

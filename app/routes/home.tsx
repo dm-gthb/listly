@@ -75,7 +75,7 @@ function SelectedCategoriesMenu({
                   strokeWidth={3}
                 />
               </NavigationMenu.Trigger>
-              <NavigationMenu.Content className="absolute top-10 -left-4 z-1 w-max min-w-[calc(100%+32px)] rounded-md bg-white px-2 py-2 shadow-xl">
+              <NavigationMenu.Content className="absolute top-10 -left-4 z-1 w-max min-w-[calc(100%+2rem)] rounded-md bg-white px-2 py-2 shadow-xl">
                 <ul className="shrink-0">
                   {parentCategory.children.map(({ id, name }) => (
                     <li key={id}>

@@ -1,8 +1,8 @@
-import type { ListingWithCategories } from 'drizzle/types';
+import type { Listing } from 'drizzle/types';
 import { Link } from 'react-router';
 import { appRoute } from '~/routes';
 
-export function ListingCard({ listing }: { listing: ListingWithCategories }) {
+export function ListingCard({ listing }: { listing: Listing }) {
   const { id, title, description, images, sum } = listing;
   return (
     <div className="overflow-hidden rounded-lg bg-gray-50 shadow transition-opacity hover:opacity-90">

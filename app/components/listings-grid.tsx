@@ -1,4 +1,4 @@
-import type { ListingWithCategories } from 'drizzle/types';
+import type { Listing } from 'drizzle/types';
 import { EditListingCard } from './edit-listing-card';
 import { ListingCard } from './listing-card';
 
@@ -6,7 +6,7 @@ export function ListingsGrid({
   listings,
   isEdit,
 }: {
-  listings: ListingWithCategories[];
+  listings: Listing[];
   isEdit?: boolean;
 }) {
   return (

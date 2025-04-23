@@ -1,15 +1,15 @@
-import { type RouteConfig, index, route } from '@react-router/dev/routes';
+import { type RouteConfig, index, layout, prefix, route } from '@react-router/dev/routes';
 
 export const appRoute = {
   register: '/register',
   login: '/login',
   search: '/search',
-  myListings: '/my',
-  myListingComments: '/my/comments',
   listing: '/listing',
-  createListing: '/listings/add',
-  updateListing: '/listings/edit',
   categoryListings: '/listings/category',
+  myListings: '/my/listings',
+  createListing: '/my/listings/add',
+  updateListing: '/my/listings/edit',
+  myListingComments: '/my/comments',
 };
 
 export default [
@@ -18,9 +18,15 @@ export default [
   route(appRoute.login, 'routes/login.tsx'),
   route(appRoute.search, 'routes/search.tsx'),
   route(`${appRoute.listing}/:listingId`, 'routes/listing.tsx'),
-  route(appRoute.myListings, 'routes/my-listings.tsx'),
-  route(appRoute.myListingComments, 'routes/my-listings-comments.tsx'),
-  route(appRoute.createListing, 'routes/create-listing.tsx'),
-  route(`${appRoute.updateListing}/:listingId`, 'routes/update-listing.tsx'),
   route(`${appRoute.categoryListings}/:categoryId`, 'routes/category-listings.tsx'),
+
+  ...prefix('my/listings', [
+    layout('routes/my-listings.tsx', [
+      index('routes/my-listing-index.tsx'),
+      route(':listingId', 'routes/my-listing.tsx'),
+      route(':listingId/edit', 'routes/update-listing.tsx'),
+      route('/new', 'routes/create-listing.tsx'),
+    ]),
+  ]),
+  route(appRoute.myListingComments, 'routes/my-listings-comments.tsx'),
 ] satisfies RouteConfig;

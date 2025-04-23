@@ -87,7 +87,7 @@ export async function action({ request, context, params }: Route.ActionArgs) {
     });
   }
 
-  return redirect(`${appRoute.myListings}`);
+  return redirect(`${appRoute.myListings}/${listingId}`);
 }
 
 export default function UpdateListing({ loaderData, actionData }: Route.ComponentProps) {
@@ -110,10 +110,9 @@ export default function UpdateListing({ loaderData, actionData }: Route.Componen
 
   return (
     <>
-      <h1 className="title mb-6 text-center">Edit Item</h1>
-      <div className="m-auto w-[600px] max-w-full rounded-2xl border border-gray-200 p-14 shadow-lg">
-        <Form method="POST" {...getFormProps(form)}>
-          {/* <div className="mb-6">
+      <h1 className="sr-only">Edit Item</h1>
+      <Form method="POST" {...getFormProps(form)}>
+        {/* <div className="mb-6">
             <input type="file" id="avatar" name="avatar" className="sr-only" />
             <label
               htmlFor="avatar"
@@ -123,82 +122,84 @@ export default function UpdateListing({ loaderData, actionData }: Route.Componen
             </label>
           </div> */}
 
-          <div className="mb-10 flex flex-col gap-4">
-            <div className="flex flex-col gap-1">
-              <label htmlFor={fields.title.id}>Title</label>
-              <input
-                className={inputClassname}
-                defaultValue={listing.title}
-                maxLength={titleMaxLength}
-                required
-                {...getInputProps(fields.title, { type: 'text' })}
-              />
-              <div className="min-h-6">
-                <FormErrorList id={fields.title.errorId} errors={fields.title.errors} />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label htmlFor={fields.description.id}>Description</label>
-              <textarea
-                className={inputClassname}
-                cols={30}
-                rows={8}
-                defaultValue={listing.description}
-                maxLength={descriptionMaxLength}
-                required
-                {...getTextareaProps(fields.description)}
-              />
-              <div className="min-h-6">
-                <FormErrorList
-                  id={fields.description.errorId}
-                  errors={fields.description.errors}
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label htmlFor={fields.sum.id}>Price</label>
-              <input
-                className={inputClassname}
-                defaultValue={listing.sum}
-                required
-                {...getInputProps(fields.sum, { type: 'number' })}
-              />
-              <div className="min-h-6">
-                <FormErrorList id={fields.sum.errorId} errors={fields.sum.errors} />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="" htmlFor={fields.categoryId.id}>
-                Category
-              </label>
-              <select
-                className={`${formControlBaseClassname} border-b`}
-                defaultValue={listing.categories[0].categoryId}
-                required
-                {...getSelectProps(fields.categoryId)}
-              >
-                {childCategories.map(({ id, name }) => (
-                  <option key={id} value={id}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-              <div className="min-h-6">
-                <FormErrorList
-                  id={fields.categoryId.errorId}
-                  errors={fields.categoryId.errors}
-                />
-              </div>
+        <div className="mb-10 flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
+            <label htmlFor={fields.title.id}>Title</label>
+            <input
+              className={inputClassname}
+              defaultValue={listing.title}
+              maxLength={titleMaxLength}
+              required
+              {...getInputProps(fields.title, { type: 'text' })}
+            />
+            <div className="min-h-6">
+              <FormErrorList id={fields.title.errorId} errors={fields.title.errors} />
             </div>
           </div>
-          <button className="button-base" type="submit">
-            Update
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor={fields.description.id}>Description</label>
+            <textarea
+              className={inputClassname}
+              cols={30}
+              rows={8}
+              defaultValue={listing.description}
+              maxLength={descriptionMaxLength}
+              required
+              {...getTextareaProps(fields.description)}
+            />
+            <div className="min-h-6">
+              <FormErrorList
+                id={fields.description.errorId}
+                errors={fields.description.errors}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor={fields.sum.id}>Price</label>
+            <input
+              className={inputClassname}
+              defaultValue={listing.sum}
+              required
+              {...getInputProps(fields.sum, { type: 'number' })}
+            />
+            <div className="min-h-6">
+              <FormErrorList id={fields.sum.errorId} errors={fields.sum.errors} />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="" htmlFor={fields.categoryId.id}>
+              Category
+            </label>
+            <select
+              className={`${formControlBaseClassname} border-b`}
+              defaultValue={listing.categories[0].categoryId}
+              required
+              {...getSelectProps(fields.categoryId)}
+            >
+              {childCategories.map(({ id, name }) => (
+                <option key={id} value={id}>
+                  {name}
+                </option>
+              ))}
+            </select>
+            <div className="min-h-6">
+              <FormErrorList
+                id={fields.categoryId.errorId}
+                errors={fields.categoryId.errors}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button type="submit" className="button-base">
+            update
           </button>
-        </Form>
-      </div>
+        </div>
+      </Form>
     </>
   );
 }

@@ -6,6 +6,7 @@ import { Link } from 'react-router';
 import { appRoute } from '~/routes';
 import type { Category } from 'drizzle/types';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import { getGroupedCategories } from '~/utils/misc';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -40,15 +41,6 @@ export default function Home({ loaderData }: Route.ComponentProps) {
       </section>
     </>
   );
-}
-
-function getGroupedCategories(categories: Category[]) {
-  const parents = categories.filter((category) => !category.parentId);
-  const children = categories.filter((category) => category.parentId);
-  return parents.map((parent) => ({
-    ...parent,
-    children: children.filter(({ parentId }) => parentId === parent.id),
-  }));
 }
 
 function SelectedCategoriesMenu({

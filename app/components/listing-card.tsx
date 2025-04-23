@@ -14,7 +14,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
             alt={`${title} image`}
           />
         </div>
-        <div className="flex flex-col gap-1 px-2 py-3">
+        <div className="flex flex-col gap-1 p-3">
           <div className="mb-1 flex justify-between gap-1 font-bold">
             <h3>{title}</h3>
             <span>${sum}</span>

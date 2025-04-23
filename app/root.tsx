@@ -10,6 +10,7 @@ import {
 import type { Route } from './+types/root';
 import './app.css';
 import { PageHeader } from './components/page-header';
+import { db } from './utils/db';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -29,10 +30,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function App() {
+export async function loader() {
+  const categories = await db.query.categories.findMany();
+  return { categories };
+}
+
+export default function App({ loaderData }: Route.ComponentProps) {
+  const { categories } = loaderData;
   return (
     <>
-      <PageHeader />
+      <PageHeader categories={categories} />
       <main className="global-container py-8">
         <Outlet />
       </main>

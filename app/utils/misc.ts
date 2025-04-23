@@ -1,3 +1,5 @@
+import type { Category } from 'drizzle/types';
+
 export function invariantResponse(
   condition: any,
   message?: string | (() => string),
@@ -35,4 +37,13 @@ export function getUpdatedSearchParamsString({
   return Array.from(updatedSearchParams.entries())
     .map(([key, value]) => (value ? `${key}=${encodeURIComponent(value)}` : key))
     .join('&');
+}
+
+export function getGroupedCategories(categories: Category[]) {
+  const parents = categories.filter((category) => !category.parentId);
+  const children = categories.filter((category) => category.parentId);
+  return parents.map((parent) => ({
+    ...parent,
+    children: children.filter(({ parentId }) => parentId === parent.id),
+  }));
 }

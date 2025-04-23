@@ -8,6 +8,7 @@ import {
   FolderPlusIcon,
   HomeIcon,
   MagnifyingGlassIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { appRoute } from '~/routes';
 import type { Category } from 'drizzle/types';
@@ -46,11 +47,11 @@ export function PageHeader({ categories }: { categories: Category[] }) {
             <div className="relative w-full">
               <input
                 type="text"
-                className="w-full grow-1 rounded-full border-2 border-gray-500 px-8 py-2 pr-12 text-base disabled:text-gray-400"
+                className="w-full grow-1 rounded-full border-2 border-gray-500 px-6 py-2 pr-12 text-base disabled:text-gray-400"
                 placeholder="Search for anything"
               />
 
-              <button className="absolute top-[50%] right-2 -translate-y-[50%] cursor-pointer p-3 text-gray-600 transition hover:text-gray-950 disabled:hover:text-gray-400">
+              <button className="absolute top-[50%] right-3 -translate-y-[50%] cursor-pointer p-3 text-gray-600 transition hover:text-gray-950 disabled:hover:text-gray-400">
                 <MagnifyingGlassIcon width={24} height={24} strokeWidth={2} />
                 <span className="sr-only">search</span>
               </button>
@@ -136,6 +137,12 @@ function AllCategoriesMenu({
               );
             })}
           </nav>
+          <Dialog.Close>
+            <button className="absolute top-2 right-2 cursor-pointer p-1">
+              <XMarkIcon width={24} height={24} />
+              <span className="sr-only">close</span>
+            </button>
+          </Dialog.Close>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

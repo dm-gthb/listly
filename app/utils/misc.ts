@@ -14,3 +14,25 @@ export function invariantResponse(
 export function formatDate(date: string) {
   return new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(date));
 }
+
+export function getUpdatedSearchParamsString({
+  initialSearchParams,
+  updates,
+}: {
+  initialSearchParams: URLSearchParams;
+  updates: Record<string, string | number | undefined>;
+}) {
+  const updatedSearchParams = new URLSearchParams(initialSearchParams);
+
+  for (const [updatesKey, updatesValue] of Object.entries(updates)) {
+    if (updatesValue === undefined) {
+      updatedSearchParams.delete(updatesKey);
+    } else {
+      updatedSearchParams.set(updatesKey, String(updatesValue));
+    }
+  }
+
+  return Array.from(updatedSearchParams.entries())
+    .map(([key, value]) => (value ? `${key}=${encodeURIComponent(value)}` : key))
+    .join('&');
+}

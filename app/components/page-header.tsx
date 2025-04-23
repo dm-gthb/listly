@@ -4,10 +4,9 @@ import {
   ArrowLeftStartOnRectangleIcon,
   ArrowRightEndOnRectangleIcon,
   ChatBubbleLeftIcon,
-  DocumentDuplicateIcon,
-  FolderPlusIcon,
   HomeIcon,
   MagnifyingGlassIcon,
+  Squares2X2Icon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { appRoute } from '~/routes';
@@ -34,7 +33,7 @@ export function PageHeader({ categories }: { categories: Category[] }) {
   return (
     <header>
       <div className="border-b border-gray-300">
-        <nav className="global-container flex items-center justify-between gap-6 py-4 text-lg">
+        <nav className="global-container flex items-center justify-between gap-6 py-4 text-lg xl:gap-10">
           <NavLink to="/">
             <HomeIcon width={24} height={24} />
             <span className="sr-only">Home</span>
@@ -58,15 +57,11 @@ export function PageHeader({ categories }: { categories: Category[] }) {
             </div>
           </Form>
 
-          <div className="flex items-center gap-6 sm:gap-8 md:gap-10">
+          <div className="flex items-center gap-4 sm:gap-6 lg:gap-8 xl:gap-10">
             {user && (
               <>
-                <NavLink to={appRoute.createListing}>
-                  <FolderPlusIcon width={24} height={24} />
-                  <span className="sr-only">Add listing</span>
-                </NavLink>
                 <NavLink to={appRoute.myListings}>
-                  <DocumentDuplicateIcon width={24} height={24} />
+                  <Squares2X2Icon width={24} height={24} />
                   <span className="sr-only">My listings</span>
                 </NavLink>
                 <NavLink to={appRoute.myListingComments}>
@@ -106,7 +101,7 @@ function AllCategoriesMenu({
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black opacity-50" />
-        <Dialog.Content className="absolute top-20 left-[50%] w-full max-w-6xl -translate-x-[50%] rounded-lg bg-white px-6 py-8 shadow-lg focus:outline-none">
+        <Dialog.Content className="absolute top-20 left-[50%] w-full max-w-[calc(100%-4rem)] -translate-x-[50%] rounded-lg bg-white px-6 py-8 shadow-lg focus:outline-none xl:max-w-6xl">
           <Dialog.Title className="sr-only">View All Categories</Dialog.Title>
           <Dialog.Description className="sr-only">
             Select category to view related listings.
@@ -137,11 +132,9 @@ function AllCategoriesMenu({
               );
             })}
           </nav>
-          <Dialog.Close>
-            <button className="absolute top-2 right-2 cursor-pointer p-1">
-              <XMarkIcon width={24} height={24} />
-              <span className="sr-only">close</span>
-            </button>
+          <Dialog.Close className="absolute top-2 right-2 cursor-pointer p-1">
+            <XMarkIcon width={24} height={24} />
+            <span className="sr-only">close</span>
           </Dialog.Close>
         </Dialog.Content>
       </Dialog.Portal>

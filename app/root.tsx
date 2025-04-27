@@ -11,6 +11,7 @@ import type { Route } from './+types/root';
 import './app.css';
 import { PageHeader } from './components/page-header';
 import { db } from './utils/db';
+import { sessionStorage } from './utils/session.server';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -30,16 +31,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export async function loader() {
+export async function loader({ request }: Route.LoaderArgs) {
   const categories = await db.query.categories.findMany();
-  return { categories };
+  const cookieSession = await sessionStorage.getSession(request.headers.get('cookie'));
+
+  const userId = cookieSession.get('userId');
+  const user = userId
+    ? await db.query.users.findFirst({
+        where: (users, { eq }) => eq(users.id, userId),
+      })
+    : null;
+
+  return { categories, user };
 }
 
 export default function App({ loaderData }: Route.ComponentProps) {
-  const { categories } = loaderData;
+  const { categories, user } = loaderData;
   return (
     <>
-      <PageHeader categories={categories} />
+      <PageHeader categories={categories} user={user} />
       <main className="global-container py-8">
         <Outlet />
       </main>

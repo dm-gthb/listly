@@ -1,72 +1,165 @@
-import { Form, Link } from 'react-router';
+import { getFormProps, getInputProps, useForm } from '@conform-to/react';
+import { getZodConstraint, parseWithZod } from '@conform-to/zod';
+import { Form, Link, redirect } from 'react-router';
+import { z } from 'zod';
 import { Spinner } from '~/components/spinner';
 import { appRoute } from '~/routes';
+import type { Route } from './+types/register';
+import { FormErrorList } from '~/components/form-error-list';
+import { db } from '~/utils/db';
+import { passwords, users } from 'drizzle/schema';
+import { bcrypt } from '~/utils/auth.server';
+import { sessionStorage } from '~/utils/session.server';
 
-const PASSWORD_MIN_LENGTH = 8;
+const signupSchema = z.object({
+  name: z
+    .string({ required_error: 'Name is required' })
+    .min(2, { message: 'Name is too short' })
+    .max(50, { message: 'Name is too long' }),
+  email: z
+    .string({ required_error: 'Email is required' })
+    .email({ message: 'Email is invalid' }),
+  password: z
+    .string({ required_error: 'Password is required' })
+    .min(8, { message: 'Password is too short' })
+    .max(70, { message: 'Password is too long' }),
+});
 
-export default function Register() {
+export async function action({ request }: Route.ActionArgs) {
+  const formData = await request.formData();
+
+  const submission = await parseWithZod(formData, {
+    schema: signupSchema
+      .superRefine(async (data, ctx) => {
+        const existingUser = await db.query.users.findFirst({
+          where: (users, { eq }) => eq(users.email, data.email),
+        });
+
+        if (existingUser) {
+          ctx.addIssue({
+            path: ['email'],
+            code: z.ZodIssueCode.custom,
+            message: 'A user already exists with this email',
+          });
+          return;
+        }
+      })
+      .transform(async (data) => {
+        const { name, email, password } = data;
+        // no transactions with d1, so simplified for now
+        // https://blog.cloudflare.com/whats-new-with-d1/
+        const insertedUserData = await db
+          .insert(users)
+          .values({
+            email: email.toLowerCase(),
+            name: name.toLowerCase(),
+          })
+          .returning({ id: users.id });
+
+        await db.insert(passwords).values({
+          hash: await bcrypt.hash(password, 10),
+          userId: insertedUserData[0].id,
+        });
+
+        return { ...data, user: insertedUserData[0] };
+      }),
+    async: true,
+  });
+
+  if (submission.status !== 'success') {
+    return submission.reply();
+  }
+
+  const { user } = submission.value;
+  const cookieSession = await sessionStorage.getSession(request.headers.get('cookie'));
+  cookieSession.set('userId', user.id);
+
+  return redirect('/', {
+    headers: {
+      'set-cookie': await sessionStorage.commitSession(cookieSession),
+    },
+  });
+}
+
+export default function Register({ actionData }: Route.ComponentProps) {
+  const lastResult = actionData;
+
   const isDisabled = false;
   const classNames = {
     input:
-      'p-3 border-2 rounded dark:bg-transparent disabled:text-gray-400 border-gray-200',
-    formGroup: 'flex flex-col gap-1 mb-4 last-of-type:mb-6',
+      'aria-[invalid]:border-red-500 p-3 border-2 rounded dark:bg-transparent disabled:text-gray-400 border-gray-200',
+    formGroup: 'flex flex-col gap-1 mb-3 last-of-type:mb-4',
   };
+
+  const [form, fields] = useForm({
+    lastResult,
+    constraint: getZodConstraint(signupSchema),
+    shouldValidate: 'onBlur',
+    shouldRevalidate: 'onInput',
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema: signupSchema });
+    },
+  });
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col items-center justify-center px-8 py-4">
       <h1 className="title mb-10">Sign Up</h1>
       <div className="mb-4 w-full sm:w-96">
         <div>
-          <Form method="POST" encType="multipart/form-data">
+          <Form method="POST" {...getFormProps(form)}>
             <fieldset disabled={false}>
-              <div className="mb-6">
+              {/* <div className="mb-6">
                 <input type="file" id="avatar" name="avatar" className="sr-only" />
                 <label htmlFor="avatar" className="button-file">
                   <span>Upload Image</span>
                 </label>
-              </div>
+              </div> */}
               <div className={classNames.formGroup}>
                 <label htmlFor="username">Name</label>
                 <input
-                  id="username"
-                  type="username"
-                  name="username"
+                  {...getInputProps(fields.name, { type: 'text' })}
                   autoComplete="username"
                   className={classNames.input}
-                  defaultValue={''}
                   autoFocus
-                  required
                 />
+                <div className="-mt-1 min-h-6">
+                  <FormErrorList id={fields.name.errorId} errors={fields.name.errors} />
+                </div>
               </div>
               <div className={classNames.formGroup}>
                 <label htmlFor="email">Email</label>
                 <input
-                  id="email"
-                  type="email"
-                  name="email"
+                  {...getInputProps(fields.email, { type: 'email' })}
                   autoComplete="email"
                   className={classNames.input}
-                  defaultValue={''}
-                  required
                 />
+                <div className="-mt-1 min-h-6">
+                  <FormErrorList id={fields.email.errorId} errors={fields.email.errors} />
+                </div>
               </div>
               <div className={classNames.formGroup}>
                 <label htmlFor="password">Password</label>
                 <div className="relative">
                   <input
-                    id="password"
-                    type="password"
-                    name="password"
-                    minLength={PASSWORD_MIN_LENGTH}
-                    autoComplete="current-password"
+                    {...getInputProps(fields.password, { type: 'password' })}
                     className={`${classNames.input} w-full pr-11`}
-                    defaultValue={''}
-                    required
+                    autoComplete="current-password"
                   />
+                  <div className="-mt-1 min-h-6">
+                    <FormErrorList
+                      id={fields.password.errorId}
+                      errors={fields.password.errors}
+                    />
+                  </div>
                 </div>
               </div>
             </fieldset>
-            <button type="submit" disabled={isDisabled} className="button-base min-h-14">
+            <FormErrorList errors={form.errors} id={form.errorId} />
+            <button
+              type="submit"
+              disabled={isDisabled}
+              className="button-base mt-1 min-h-14"
+            >
               {isDisabled ? (
                 <Spinner
                   width={20}

@@ -15,9 +15,6 @@ import {
 } from '@conform-to/react';
 import { FormErrorList } from '~/components/form-error-list';
 
-const titleMaxLength = 100;
-const descriptionMaxLength = 500;
-
 export async function loader({ params }: Route.LoaderArgs) {
   const id = params.listingId;
   if (id === undefined) {
@@ -45,8 +42,8 @@ export async function loader({ params }: Route.LoaderArgs) {
 }
 
 const listingEditorSchema = z.object({
-  title: z.string().min(1).max(titleMaxLength),
-  description: z.string().min(1).max(descriptionMaxLength),
+  title: z.string().min(1).max(100),
+  description: z.string().min(1).max(500),
   sum: z.number().min(0),
   categoryId: z.number().min(1),
 });
@@ -128,8 +125,6 @@ export default function UpdateListing({ loaderData, actionData }: Route.Componen
             <input
               className={inputClassname}
               defaultValue={listing.title}
-              maxLength={titleMaxLength}
-              required
               {...getInputProps(fields.title, { type: 'text' })}
             />
             <div className="min-h-6">
@@ -144,8 +139,6 @@ export default function UpdateListing({ loaderData, actionData }: Route.Componen
               cols={30}
               rows={8}
               defaultValue={listing.description}
-              maxLength={descriptionMaxLength}
-              required
               {...getTextareaProps(fields.description)}
             />
             <div className="min-h-6">
@@ -161,7 +154,6 @@ export default function UpdateListing({ loaderData, actionData }: Route.Componen
             <input
               className={inputClassname}
               defaultValue={listing.sum}
-              required
               {...getInputProps(fields.sum, { type: 'number' })}
             />
             <div className="min-h-6">
@@ -176,7 +168,6 @@ export default function UpdateListing({ loaderData, actionData }: Route.Componen
             <select
               className={`${formControlBaseClassname} border-b`}
               defaultValue={listing.categories[0].categoryId}
-              required
               {...getSelectProps(fields.categoryId)}
             >
               {childCategories.map(({ id, name }) => (

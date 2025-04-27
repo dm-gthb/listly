@@ -27,6 +27,7 @@ export type InferResultType<
 >;
 
 export type Listing = typeof schema.listings.$inferSelect;
+export type User = typeof schema.users.$inferSelect;
 export type Category = typeof schema.categories.$inferSelect;
 export type Comment = typeof schema.comments.$inferSelect;
 export type ListingWithCategories = InferResultType<'listings', { categories: true }>;

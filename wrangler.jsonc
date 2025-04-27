@@ -22,6 +22,18 @@
       "migrations_dir": "./drizzle/migrations",
     },
   ],
+	"env": {
+    "development": {
+      "vars": {
+        "ENV": "development"
+      }
+    },
+    "production": {
+      "vars": {
+        "ENV": "production"
+      }
+    }
+  },
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

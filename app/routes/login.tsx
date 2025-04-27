@@ -1,54 +1,135 @@
-import { Link } from 'react-router';
+import { getFormProps, getInputProps, useForm } from '@conform-to/react';
+import { Form, Link, redirect } from 'react-router';
+import { z } from 'zod';
 import { Spinner } from '~/components/spinner';
 import { appRoute } from '~/routes';
+import type { Route } from './+types/login';
+import { getZodConstraint, parseWithZod } from '@conform-to/zod';
+import { db } from '~/utils/db';
+import { FormErrorList } from '~/components/form-error-list';
+import { sessionStorage } from '~/utils/session.server';
+import { bcrypt } from '~/utils/auth.server';
 
-const PASSWORD_MIN_LENGTH = 8;
+const loginSchema = z.object({
+  email: z
+    .string({ required_error: 'Email is required' })
+    .email({ message: 'Email is invalid' }),
+  password: z
+    .string({ required_error: 'Password is required' })
+    .min(8, { message: 'Password is too short' })
+    .max(70, { message: 'Password is too long' }),
+});
 
-export default function Login() {
+export async function action({ request }: Route.ActionArgs) {
+  const formData = await request.formData();
+  const submission = await parseWithZod(formData, {
+    schema: () =>
+      loginSchema.transform(async (data, ctx) => {
+        const user = await db.query.users.findFirst({
+          where: (users, { eq }) => eq(users.email, data.email),
+        });
+
+        const password = user
+          ? await db.query.passwords.findFirst({
+              where: (passwords, { eq }) => eq(passwords.userId, user.id),
+            })
+          : null;
+
+        const isValidPassword = password
+          ? await bcrypt.compare(data.password, password.hash)
+          : false;
+
+        if (!isValidPassword || !user) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Invalid username or password',
+          });
+          return z.NEVER;
+        }
+
+        return { ...data, user };
+      }),
+    async: true,
+  });
+
+  delete submission.payload.password;
+
+  if (submission.status !== 'success') {
+    return submission.reply();
+  }
+
+  const { user } = submission.value;
+  const cookieSession = await sessionStorage.getSession(request.headers.get('cookie'));
+  cookieSession.set('userId', user.id);
+
+  return redirect('/', {
+    headers: {
+      'set-cookie': await sessionStorage.commitSession(cookieSession),
+    },
+  });
+}
+
+export default function Login({ actionData }: Route.ComponentProps) {
+  const lastResult = actionData;
   const isDisabled = false;
+
   const classNames = {
     input:
-      'p-3 border-2 rounded dark:bg-transparent disabled:text-gray-400 border-gray-200',
-    formGroup: 'flex flex-col gap-1 mb-4 last-of-type:mb-6',
+      'aria-[invalid]:border-red-500 p-3 border-2 rounded dark:bg-transparent disabled:text-gray-400 border-gray-200',
+    formGroup: 'flex flex-col gap-1 mb-3 last-of-type:mb-4',
   };
+
+  const [form, fields] = useForm({
+    lastResult,
+    constraint: getZodConstraint(loginSchema),
+    shouldValidate: 'onBlur',
+    shouldRevalidate: 'onInput',
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema: loginSchema });
+    },
+  });
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col items-center justify-center px-8 py-4">
       <h1 className="title mb-10">Log In</h1>
       <div className="mb-4 w-full sm:w-96">
         <div>
-          <form>
+          <Form method="POST" {...getFormProps(form)}>
             <fieldset disabled={false}>
               <div className={classNames.formGroup}>
-                <label htmlFor="email">Email</label>
+                <label htmlFor={fields.email.id}>Email</label>
                 <input
-                  id="email"
-                  type="email"
-                  name="email"
-                  autoComplete="email"
+                  {...getInputProps(fields.email, { type: 'email' })}
                   className={classNames.input}
-                  defaultValue={''}
+                  autoComplete="email"
                   autoFocus
-                  required
                 />
+                <div className="min-h-6">
+                  <FormErrorList id={fields.email.errorId} errors={fields.email.errors} />
+                </div>
               </div>
               <div className={classNames.formGroup}>
-                <label htmlFor="password">Password</label>
-                <div className="relative">
-                  <input
-                    id="password"
-                    type="password"
-                    name="password"
-                    minLength={PASSWORD_MIN_LENGTH}
-                    autoComplete="current-password"
-                    className={`${classNames.input} w-full pr-11`}
-                    defaultValue={''}
-                    required
+                <label htmlFor={fields.password.id}>Password</label>
+                <input
+                  {...getInputProps(fields.password, { type: 'password' })}
+                  className={`${classNames.input} w-full pr-11`}
+                  autoComplete="current-password"
+                />
+                <div className="min-h-6">
+                  <FormErrorList
+                    id={fields.password.errorId}
+                    errors={fields.password.errors}
                   />
                 </div>
               </div>
             </fieldset>
-            <button type="submit" disabled={isDisabled} className="button-base min-h-14">
+            <FormErrorList errors={form.errors} id={form.errorId} />
+
+            <button
+              type="submit"
+              disabled={isDisabled}
+              className="button-base mt-1 min-h-14"
+            >
               {isDisabled ? (
                 <Spinner
                   width={20}
@@ -59,7 +140,7 @@ export default function Login() {
                 <span>Login</span>
               )}
             </button>
-          </form>
+          </Form>
         </div>
       </div>
       <div>

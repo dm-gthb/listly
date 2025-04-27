@@ -2,21 +2,26 @@ import { Form, Link, NavLink, useLocation, useNavigate } from 'react-router';
 import * as Dialog from '@radix-ui/react-dialog';
 import {
   ArrowLeftStartOnRectangleIcon,
-  ArrowRightEndOnRectangleIcon,
   ChatBubbleLeftIcon,
   HomeIcon,
   MagnifyingGlassIcon,
   Squares2X2Icon,
+  UserIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { appRoute } from '~/routes';
-import type { Category } from 'drizzle/types';
+import type { Category, User } from 'drizzle/types';
 import { getGroupedCategories } from '~/utils/misc';
 
-export function PageHeader({ categories }: { categories: Category[] }) {
+export function PageHeader({
+  categories,
+  user,
+}: {
+  categories: Category[];
+  user: User | null | undefined;
+}) {
   const location = useLocation();
   const navigate = useNavigate();
-  const user = true;
 
   const handleLogout = () => {
     // logout();
@@ -58,7 +63,7 @@ export function PageHeader({ categories }: { categories: Category[] }) {
           </Form>
 
           <div className="flex items-center gap-4 sm:gap-6 lg:gap-8 xl:gap-10">
-            {user && (
+            {user ? (
               <>
                 <NavLink to={appRoute.myListings}>
                   <Squares2X2Icon width={24} height={24} />
@@ -73,10 +78,9 @@ export function PageHeader({ categories }: { categories: Category[] }) {
                   <span className="sr-only">Logout</span>
                 </button>
               </>
-            )}
-            {!user && (
+            ) : (
               <NavLink to={appRoute.login}>
-                <ArrowRightEndOnRectangleIcon width={24} height={24} />
+                <UserIcon width={24} height={24} />
                 <span className="sr-only">Login</span>
               </NavLink>
             )}

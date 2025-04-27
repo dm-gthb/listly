@@ -18,6 +18,13 @@ export const users = sqliteTable('users', {
   ...timestamps,
 });
 
+export const passwords = sqliteTable('passwords', {
+  hash: text().notNull(),
+  userId: integer()
+    .references(() => users.id)
+    .notNull(),
+});
+
 export const listings = sqliteTable('listings', {
   id: integer().primaryKey(),
   title: text().notNull(),
@@ -66,9 +73,14 @@ export const listingToCategory = sqliteTable(
   (t) => [primaryKey({ columns: [t.listingId, t.categoryId] })],
 );
 
-export const userRelations = relations(users, ({ many }) => ({
+export const userRelations = relations(users, ({ one, many }) => ({
   listings: many(listings),
   comments: many(comments),
+  password: one(passwords),
+}));
+
+export const passwordsRelations = relations(passwords, ({ one }) => ({
+  user: one(users, { fields: [passwords.userId], references: [users.id] }),
 }));
 
 export const listingRelations = relations(listings, ({ one, many }) => ({

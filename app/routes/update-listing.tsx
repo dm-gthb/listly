@@ -14,15 +14,18 @@ import {
   useForm,
 } from '@conform-to/react';
 import { FormErrorList } from '~/components/form-error-list';
+import { requireUser } from '~/utils/auth.server';
 
-export async function loader({ params }: Route.LoaderArgs) {
+export async function loader({ request, params }: Route.LoaderArgs) {
   const id = params.listingId;
   if (id === undefined) {
     throw new Response('No listingId param', { status: 400 });
   }
 
+  const user = await requireUser(request);
   const listing = await db.query.listings.findFirst({
-    where: (lisings, { eq }) => eq(lisings.id, +id),
+    where: (lisings, { and, eq }) =>
+      and(eq(lisings.id, +id), eq(listings.ownerId, user.id)),
     with: {
       categories: {
         columns: {
@@ -32,12 +35,11 @@ export async function loader({ params }: Route.LoaderArgs) {
     },
   });
 
-  const categories = await db.query.categories.findMany();
-
   if (!listing) {
     throw new Response('Listing not found', { status: 404 });
   }
 
+  const categories = await db.query.categories.findMany();
   return { listing, categories };
 }
 
@@ -48,12 +50,13 @@ const listingEditorSchema = z.object({
   categoryId: z.number().min(1),
 });
 
-export async function action({ request, context, params }: Route.ActionArgs) {
+export async function action({ request, params }: Route.ActionArgs) {
   const listingId = params.listingId;
   if (listingId === undefined) {
     throw new Response('No listingId param', { status: 400 });
   }
 
+  const user = await requireUser(request);
   const formData = await request.formData();
 
   const submission = parseWithZod(formData, {
@@ -73,6 +76,7 @@ export async function action({ request, context, params }: Route.ActionArgs) {
       description,
       sum,
       updatedAt: new Date().toISOString(),
+      ownerId: user.id,
     })
     .where(eq(listings.id, +listingId));
 

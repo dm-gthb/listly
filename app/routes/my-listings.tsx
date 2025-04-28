@@ -1,21 +1,21 @@
-import { Link, NavLink, Outlet } from 'react-router';
-import { ListingsGrid } from '~/components/listings-grid';
-import { appRoute } from '~/routes';
+import { NavLink, Outlet, type LoaderFunctionArgs } from 'react-router';
 import { db } from '~/utils/db';
 import type { Route } from './+types/my-listings';
 import { PlusIcon } from '@heroicons/react/24/outline';
+import { requireUser } from '~/utils/auth.server';
 
-export async function loader() {
-  const dummyUserListings = await db.query.listings.findMany({
+export async function loader({ request }: LoaderFunctionArgs) {
+  const user = await requireUser(request);
+  const listings = await db.query.listings.findMany({
+    where: (lisings, { eq }) => eq(lisings.ownerId, user.id),
     with: { categories: true },
     orderBy: (listings, { asc }) => [asc(listings.createdAt)],
-    limit: 8,
   });
-  return { dummyUserListings };
+  return { listings };
 }
 
 export default function MyListings({ loaderData }: Route.ComponentProps) {
-  const { dummyUserListings } = loaderData;
+  const { listings } = loaderData;
   return (
     <div className="flex">
       <div className="shrink-0 grow-0">
@@ -32,7 +32,7 @@ export default function MyListings({ loaderData }: Route.ComponentProps) {
             <PlusIcon width={24} height={24} />
             Add New Item
           </NavLink>
-          {dummyUserListings.map(({ id, title }) => {
+          {listings.map(({ id, title }) => {
             return (
               <li key={id}>
                 <NavLink

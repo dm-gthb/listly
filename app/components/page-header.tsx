@@ -1,7 +1,7 @@
 import { Form, Link, NavLink, useLocation, useNavigate } from 'react-router';
 import * as Dialog from '@radix-ui/react-dialog';
 import {
-  ArrowLeftStartOnRectangleIcon,
+  ArrowRightStartOnRectangleIcon,
   ChatBubbleLeftIcon,
   HomeIcon,
   MagnifyingGlassIcon,
@@ -21,20 +21,6 @@ export function PageHeader({
   user: User | null | undefined;
 }) {
   const location = useLocation();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    // logout();
-    navigate('/');
-  };
-
-  const handleSearchFormSubmit = (formData: FormData) => {
-    const searchTermValue = formData.get('searchTerm') as string;
-    if (searchTermValue?.trim()) {
-      navigate(`search/${searchTermValue}`);
-    }
-  };
-
   return (
     <header>
       <div className="border-b border-gray-300">
@@ -73,10 +59,16 @@ export function PageHeader({
                   <ChatBubbleLeftIcon width={24} height={24} />
                   <span className="sr-only">Comments</span>
                 </NavLink>
-                <button onClick={handleLogout}>
-                  <ArrowLeftStartOnRectangleIcon width={24} height={24} />
-                  <span className="sr-only">Logout</span>
-                </button>
+                <Form
+                  method="POST"
+                  action="/logout"
+                  className="flex items-center justify-center"
+                >
+                  <button type="submit" className="cursor-pointer">
+                    <ArrowRightStartOnRectangleIcon width={24} height={24} />
+                    <span className="sr-only">Logout</span>
+                  </button>
+                </Form>
               </>
             ) : (
               <NavLink to={appRoute.login}>

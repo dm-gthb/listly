@@ -7,8 +7,12 @@ import { appRoute } from '~/routes';
 import type { Route } from './+types/register';
 import { FormErrorList } from '~/components/form-error-list';
 import { db } from '~/utils/db';
-import { passwords, users } from 'drizzle/schema';
-import { bcrypt } from '~/utils/auth.server';
+import {
+  getSessionExpirationDate,
+  requireAnonymous,
+  setUserIdCookie,
+  signupUser,
+} from '~/utils/auth.server';
 import { sessionStorage } from '~/utils/session.server';
 
 const signupSchema = z.object({
@@ -45,23 +49,8 @@ export async function action({ request }: Route.ActionArgs) {
         }
       })
       .transform(async (data) => {
-        const { name, email, password } = data;
-        // no transactions with d1, so simplified for now
-        // https://blog.cloudflare.com/whats-new-with-d1/
-        const insertedUserData = await db
-          .insert(users)
-          .values({
-            email: email.toLowerCase(),
-            name: name.toLowerCase(),
-          })
-          .returning({ id: users.id });
-
-        await db.insert(passwords).values({
-          hash: await bcrypt.hash(password, 10),
-          userId: insertedUserData[0].id,
-        });
-
-        return { ...data, user: insertedUserData[0] };
+        const user = await signupUser(data);
+        return { ...data, user };
       }),
     async: true,
   });
@@ -71,14 +60,19 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   const { user } = submission.value;
-  const cookieSession = await sessionStorage.getSession(request.headers.get('cookie'));
-  cookieSession.set('userId', user.id);
-
+  const cookieSession = await setUserIdCookie({ request, userId: user.id });
   return redirect('/', {
     headers: {
-      'set-cookie': await sessionStorage.commitSession(cookieSession),
+      'set-cookie': await sessionStorage.commitSession(cookieSession, {
+        expires: getSessionExpirationDate(),
+      }),
     },
   });
+}
+
+export async function loader({ request }: Route.LoaderArgs) {
+  await requireAnonymous(request);
+  return {};
 }
 
 export default function Register({ actionData }: Route.ComponentProps) {

@@ -8,7 +8,11 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod';
 import { db } from '~/utils/db';
 import { FormErrorList } from '~/components/form-error-list';
 import { sessionStorage } from '~/utils/session.server';
-import { bcrypt } from '~/utils/auth.server';
+import {
+  checkIsValidPassword,
+  getSessionExpirationDate,
+  requireAnonymous,
+} from '~/utils/auth.server';
 
 const loginSchema = z.object({
   email: z
@@ -36,13 +40,13 @@ export async function action({ request }: Route.ActionArgs) {
           : null;
 
         const isValidPassword = password
-          ? await bcrypt.compare(data.password, password.hash)
+          ? await checkIsValidPassword({ password: data.password, hash: password.hash })
           : false;
 
         if (!isValidPassword || !user) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'Invalid username or password',
+            message: 'Invalid email or password',
           });
           return z.NEVER;
         }
@@ -64,9 +68,16 @@ export async function action({ request }: Route.ActionArgs) {
 
   return redirect('/', {
     headers: {
-      'set-cookie': await sessionStorage.commitSession(cookieSession),
+      'set-cookie': await sessionStorage.commitSession(cookieSession, {
+        expires: getSessionExpirationDate(),
+      }),
     },
   });
+}
+
+export async function loader({ request }: Route.LoaderArgs) {
+  await requireAnonymous(request);
+  return {};
 }
 
 export default function Login({ actionData }: Route.ComponentProps) {

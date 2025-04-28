@@ -11,7 +11,7 @@ import type { Route } from './+types/root';
 import './app.css';
 import { PageHeader } from './components/page-header';
 import { db } from './utils/db';
-import { sessionStorage } from './utils/session.server';
+import { getUser } from './utils/auth.server';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -33,15 +33,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const categories = await db.query.categories.findMany();
-  const cookieSession = await sessionStorage.getSession(request.headers.get('cookie'));
-
-  const userId = cookieSession.get('userId');
-  const user = userId
-    ? await db.query.users.findFirst({
-        where: (users, { eq }) => eq(users.id, userId),
-      })
-    : null;
-
+  const user = await getUser(request);
   return { categories, user };
 }
 

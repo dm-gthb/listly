@@ -3,7 +3,7 @@ import { sessionStorage } from './session.server';
 import { db } from './db.server';
 import { redirect } from 'react-router';
 import type { User } from 'drizzle/types';
-import { passwords, users } from 'drizzle/schema';
+import { passwords, users, usersToRoles } from 'drizzle/schema';
 
 export const userIdCookieKey = 'userId';
 
@@ -106,19 +106,31 @@ export async function signupUser({
 }) {
   // no transactions with d1, so simplified for now
   // https://blog.cloudflare.com/whats-new-with-d1/
-  const insertedUserData = await db
+  const [createdUser] = await db
     .insert(users)
     .values({
       email: email.toLowerCase(),
       name: name.toLowerCase(),
     })
-    .returning({ id: users.id });
+    .returning();
 
   await db.insert(passwords).values({
     hash: await bcrypt.hash(password, 10),
-    userId: insertedUserData[0].id,
+    userId: createdUser.id,
   });
-  return { id: insertedUserData[0].id };
+
+  const unverifiedRole = await db.query.roles.findFirst({
+    where: (roles, { eq }) => eq(roles.name, 'unverified'),
+  });
+
+  if (unverifiedRole) {
+    await db.insert(usersToRoles).values({
+      userId: createdUser.id,
+      roleId: unverifiedRole.id,
+    });
+  }
+
+  return { id: createdUser.id };
 }
 
 async function getCookieSession(request: Request) {

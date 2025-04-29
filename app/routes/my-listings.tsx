@@ -9,7 +9,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const listings = await db.query.listings.findMany({
     where: (lisings, { eq }) => eq(lisings.ownerId, user.id),
     with: { categories: true },
-    orderBy: (listings, { asc }) => [asc(listings.createdAt)],
+    orderBy: (listings, { desc }) => [desc(listings.createdAt)],
   });
   return { listings };
 }

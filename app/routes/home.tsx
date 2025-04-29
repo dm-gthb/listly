@@ -19,7 +19,7 @@ export async function loader() {
   const categories = await db.query.categories.findMany();
   const latestListings = await db.query.listings.findMany({
     with: { categories: true },
-    orderBy: (listings, { asc }) => [asc(listings.createdAt)],
+    orderBy: (listings, { desc }) => [desc(listings.createdAt)],
     limit: 8,
   });
   return { categories, latestListings };

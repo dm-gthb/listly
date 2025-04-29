@@ -28,7 +28,7 @@ export async function requireUserWithPermission(
     });
   }
 
-  return user.id;
+  return user;
 }
 
 type Action = 'create' | 'read' | 'update' | 'delete';

@@ -23,7 +23,10 @@ export const passwords = sqliteTable(
   {
     hash: text().notNull(),
     userId: integer()
-      .references(() => users.id)
+      .references(() => users.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      })
       .notNull(),
   },
   (t) => [primaryKey({ columns: [t.userId] })],
@@ -41,7 +44,10 @@ export const listings = sqliteTable('listings', {
     .default(sql`'[]'`),
   ownerId: integer()
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, {
+      onDelete: 'cascade',
+      onUpdate: 'cascade',
+    }),
   ...timestamps,
 });
 
@@ -57,10 +63,16 @@ export const comments = sqliteTable('comments', {
   text: text().notNull(),
   userId: integer()
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, {
+      onDelete: 'cascade',
+      onUpdate: 'cascade',
+    }),
   listingId: integer()
     .notNull()
-    .references(() => listings.id),
+    .references(() => listings.id, {
+      onDelete: 'cascade',
+      onUpdate: 'cascade',
+    }),
   ...timestamps,
 });
 
@@ -69,20 +81,19 @@ export const listingToCategory = sqliteTable(
   {
     listingId: integer()
       .notNull()
-      .references(() => listings.id),
+      .references(() => listings.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
     categoryId: integer()
       .notNull()
-      .references(() => categories.id),
+      .references(() => categories.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
   },
   (t) => [primaryKey({ columns: [t.listingId, t.categoryId] })],
 );
-
-export const userRelations = relations(users, ({ one, many }) => ({
-  listings: many(listings),
-  comments: many(comments),
-  password: one(passwords),
-  usersToRoles: many(usersToRoles),
-}));
 
 export const roles = sqliteTable('roles', {
   id: integer().primaryKey(),
@@ -91,34 +102,24 @@ export const roles = sqliteTable('roles', {
   ...timestamps,
 });
 
-export const rolesRelations = relations(roles, ({ many }) => ({
-  usersToRoles: many(usersToRoles),
-  permissionsToRoles: many(permissionsToRoles),
-}));
-
 export const usersToRoles = sqliteTable(
   'usersToRoles',
   {
     userId: integer()
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
     roleId: integer()
       .notNull()
-      .references(() => roles.id),
+      .references(() => roles.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
   },
   (t) => [primaryKey({ columns: [t.userId, t.roleId] })],
 );
-
-export const usersToRolesRelations = relations(usersToRoles, ({ one }) => ({
-  role: one(roles, {
-    fields: [usersToRoles.roleId],
-    references: [roles.id],
-  }),
-  user: one(users, {
-    fields: [usersToRoles.userId],
-    references: [users.id],
-  }),
-}));
 
 export const permissions = sqliteTable(
   'permissions',
@@ -135,22 +136,51 @@ export const permissions = sqliteTable(
   }),
 );
 
-export const permissionsRelations = relations(permissions, ({ many }) => ({
-  permissionsToRoles: many(permissionsToRoles),
-}));
-
 export const permissionsToRoles = sqliteTable(
   'permissionsToRoles',
   {
     permissionId: integer()
       .notNull()
-      .references(() => permissions.id),
+      .references(() => permissions.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
     roleId: integer()
       .notNull()
-      .references(() => roles.id),
+      .references(() => roles.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
   },
   (t) => [primaryKey({ columns: [t.permissionId, t.roleId] })],
 );
+
+export const userRelations = relations(users, ({ one, many }) => ({
+  listings: many(listings),
+  comments: many(comments),
+  password: one(passwords),
+  usersToRoles: many(usersToRoles),
+}));
+
+export const rolesRelations = relations(roles, ({ many }) => ({
+  usersToRoles: many(usersToRoles),
+  permissionsToRoles: many(permissionsToRoles),
+}));
+
+export const usersToRolesRelations = relations(usersToRoles, ({ one }) => ({
+  role: one(roles, {
+    fields: [usersToRoles.roleId],
+    references: [roles.id],
+  }),
+  user: one(users, {
+    fields: [usersToRoles.userId],
+    references: [users.id],
+  }),
+}));
+
+export const permissionsRelations = relations(permissions, ({ many }) => ({
+  permissionsToRoles: many(permissionsToRoles),
+}));
 
 export const permissionsToRolesRelations = relations(permissionsToRoles, ({ one }) => ({
   role: one(roles, {

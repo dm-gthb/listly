@@ -6,7 +6,7 @@ import { Spinner } from '~/components/spinner';
 import { appRoute } from '~/routes';
 import type { Route } from './+types/register';
 import { FormErrorList } from '~/components/form-error-list';
-import { db } from '~/utils/db';
+import { db } from '~/utils/db.server';
 import {
   getSessionExpirationDate,
   requireAnonymous,

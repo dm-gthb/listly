@@ -1,5 +1,5 @@
 import type { Route } from './+types/listing';
-import { db } from '~/utils/db';
+import { db } from '~/utils/db.server';
 import { formatDate } from '~/utils/misc';
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -61,22 +61,26 @@ export default function Listing({ loaderData }: Route.ComponentProps) {
       <p className="mb-8">{description}</p>
       <h2 className="title">Item specifics</h2>
       <table className="mb-8">
-        <th className="sr-only">
-          <th className="pr-2">Property</th>
-          <th>Value</th>
-        </th>
-        <tr>
-          <td className="pr-4 text-gray-600">Condition</td>
-          <td className="capitalize">{condition}</td>
-        </tr>
-        <tr>
-          <td className="pr-4 text-gray-600">Categories</td>
-          <td>{categories.map(({ name }) => name).join(', ')}</td>
-        </tr>
-        <tr>
-          <td className="pr-4 text-gray-600">Posted</td>
-          <td>{formatDate(createdAt)}</td>
-        </tr>
+        <thead>
+          <tr className="sr-only">
+            <th className="pr-2">Property</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td className="pr-4 text-gray-600">Condition</td>
+            <td className="capitalize">{condition}</td>
+          </tr>
+          <tr>
+            <td className="pr-4 text-gray-600">Categories</td>
+            <td>{categories.map(({ name }) => name).join(', ')}</td>
+          </tr>
+          <tr>
+            <td className="pr-4 text-gray-600">Posted</td>
+            <td>{formatDate(createdAt)}</td>
+          </tr>
+        </tbody>
       </table>
 
       {/* <h3 className="title">Comments</h3>

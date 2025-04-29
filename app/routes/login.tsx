@@ -5,7 +5,7 @@ import { Spinner } from '~/components/spinner';
 import { appRoute } from '~/routes';
 import type { Route } from './+types/login';
 import { getZodConstraint, parseWithZod } from '@conform-to/zod';
-import { db } from '~/utils/db';
+import { db } from '~/utils/db.server';
 import { FormErrorList } from '~/components/form-error-list';
 import { sessionStorage } from '~/utils/session.server';
 import {

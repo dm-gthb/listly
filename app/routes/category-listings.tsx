@@ -1,7 +1,7 @@
 import { ListingsGrid } from '~/components/listings-grid';
 import { Pagination } from '~/components/pagination';
 import type { Route } from './+types/category-listings';
-import { db } from '~/utils/db';
+import { db } from '~/utils/db.server';
 import { invariantResponse } from '~/utils/misc';
 import { desc, eq, sql } from 'drizzle-orm';
 import { listings, listingToCategory } from 'drizzle/schema';

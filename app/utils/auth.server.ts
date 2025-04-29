@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { sessionStorage } from './session.server';
-import { db } from './db';
+import { db } from './db.server';
 import { redirect } from 'react-router';
 import type { User } from 'drizzle/types';
 import { passwords, users } from 'drizzle/schema';

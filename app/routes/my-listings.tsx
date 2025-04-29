@@ -1,5 +1,5 @@
 import { NavLink, Outlet, type LoaderFunctionArgs } from 'react-router';
-import { db } from '~/utils/db';
+import { db } from '~/utils/db.server';
 import type { Route } from './+types/my-listings';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { requireUser } from '~/utils/auth.server';

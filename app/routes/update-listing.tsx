@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { getZodConstraint, parseWithZod } from '@conform-to/zod';
-import { db } from '~/utils/db';
+import { db } from '~/utils/db.server';
 import type { Route } from './+types/update-listing';
 import { listings, listingToCategory } from 'drizzle/schema';
 import { eq } from 'drizzle-orm';

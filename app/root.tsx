@@ -10,7 +10,7 @@ import {
 import type { Route } from './+types/root';
 import './app.css';
 import { PageHeader } from './components/page-header';
-import { db } from './utils/db';
+import { db } from './utils/db.server';
 import { getUserWithRolesAndPermissions } from './utils/auth.server';
 
 export function Layout({ children }: { children: React.ReactNode }) {

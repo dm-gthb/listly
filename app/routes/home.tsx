@@ -1,7 +1,7 @@
 import * as NavigationMenu from '@radix-ui/react-navigation-menu';
 import type { Route } from './+types/home';
 import { ListingsGrid } from '~/components/listings-grid';
-import { db } from '~/utils/db';
+import { db } from '~/utils/db.server';
 import { Link } from 'react-router';
 import { appRoute } from '~/routes';
 import type { Category } from 'drizzle/types';

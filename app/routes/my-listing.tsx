@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { db } from '~/utils/db';
+import { db } from '~/utils/db.server';
 import type { Route } from './+types/my-listing';
 import { formatDate } from '~/utils/misc';
 import { requireUser } from '~/utils/auth.server';

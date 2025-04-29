@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from 'react-router';
 import { Comment } from '~/components/comment';
 import { requireUser } from '~/utils/auth.server';
-import { db } from '~/utils/db';
+import { db } from '~/utils/db.server';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireUser(request);

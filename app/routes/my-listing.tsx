@@ -1,8 +1,16 @@
-import { Link } from 'react-router';
+import { Form, Link, redirect, useActionData } from 'react-router';
 import { db } from '~/utils/db.server';
 import type { Route } from './+types/my-listing';
-import { formatDate } from '~/utils/misc';
+import { formatDate, invariantResponse } from '~/utils/misc';
 import { requireUser } from '~/utils/auth.server';
+import { requireUserWithPermission } from '~/utils/permissions.server';
+import { z } from 'zod';
+import { getFormProps, getInputProps, useForm } from '@conform-to/react';
+import { getZodConstraint, parseWithZod } from '@conform-to/zod';
+import { FormErrorList } from '~/components/form-error-list';
+import { eq } from 'drizzle-orm';
+import { listings } from 'drizzle/schema';
+import { appRoute } from '~/routes';
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const id = params.listingId;
@@ -37,9 +45,37 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   return { listing: listingWithNormalizedCategories };
 }
 
+const deleteListingSchema = z.object({
+  listingId: z.number(),
+});
+export async function action({ request }: Route.ActionArgs) {
+  const formData = await request.formData();
+  const submission = parseWithZod(formData, {
+    schema: deleteListingSchema,
+  });
+
+  if (submission.status !== 'success') {
+    return submission.reply();
+  }
+
+  const { listingId } = submission.value;
+
+  const user = await requireUserWithPermission(request, 'delete:listing:own');
+
+  const listingToDelete = await db.query.listings.findFirst({
+    where: (listings, { and, eq }) =>
+      and(eq(listings.id, listingId), eq(listings.ownerId, user.id)),
+  });
+
+  invariantResponse(listingToDelete, 'Not found', { status: 404 });
+  await db.delete(listings).where(eq(listings.id, listingId));
+  return redirect(appRoute.myListings);
+}
+
 export default function MyListing({ loaderData }: Route.ComponentProps) {
   const {
     listing: {
+      id,
       title,
       description,
       sum,
@@ -98,12 +134,34 @@ export default function MyListing({ loaderData }: Route.ComponentProps) {
           to="edit"
           className="button-base w-fit min-w-[150px] bg-gray-600 py-2.5 text-white hover:opacity-90"
         >
-          edit
+          Edit
         </Link>
-        <button className="button-base w-fit min-w-[150px] bg-red-600 py-2.5 text-white hover:opacity-90">
-          delete
-        </button>
+        <DeleteListing id={id} />
       </div>
     </div>
+  );
+}
+
+function DeleteListing({ id }: { id: number }) {
+  const actionData = useActionData<typeof action>();
+  const [form, fields] = useForm({
+    lastResult: actionData,
+    constraint: getZodConstraint(deleteListingSchema),
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema: deleteListingSchema });
+    },
+  });
+
+  return (
+    <Form method="POST" {...getFormProps(form)}>
+      <input {...getInputProps(fields.listingId, { type: 'hidden' })} value={id} />
+      <button
+        type="submit"
+        className="button-base w-fit min-w-[150px] bg-red-600 py-2.5 text-white hover:opacity-90"
+      >
+        Delete
+      </button>
+      <FormErrorList errors={form.errors} id={form.errorId} />
+    </Form>
   );
 }

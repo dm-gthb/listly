@@ -15,6 +15,8 @@ import {
 } from '@conform-to/react';
 import { FormErrorList } from '~/components/form-error-list';
 import { requireUser } from '~/utils/auth.server';
+import { requireUserWithPermission } from '~/utils/permissions.server';
+import { useUser } from '~/utils/user';
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const id = params.listingId;
@@ -69,6 +71,8 @@ export async function action({ request, params }: Route.ActionArgs) {
 
   const { title, description, sum, categoryId } = submission.value;
 
+  await requireUserWithPermission(request, 'update:listing:own');
+
   await db
     .update(listings)
     .set({
@@ -95,6 +99,8 @@ export default function UpdateListing({ loaderData, actionData }: Route.Componen
   const { listing, categories } = loaderData;
   const lastResult = actionData;
   const childCategories = categories.filter((c) => c.parentId !== null);
+  const user = useUser();
+  const isUnverifiedUser = user.roles.some(({ name }) => name === 'unverified');
 
   const [form, fields] = useForm({
     lastResult,
@@ -190,9 +196,19 @@ export default function UpdateListing({ loaderData, actionData }: Route.Componen
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          <button type="submit" className="button-base">
-            update
-          </button>
+          {isUnverifiedUser ? (
+            <button
+              type="button"
+              className="button-base"
+              onClick={() => alert('Not Allowed. Current user role: Unverified')}
+            >
+              update
+            </button>
+          ) : (
+            <button type="submit" className="button-base">
+              update
+            </button>
+          )}
         </div>
       </Form>
     </>

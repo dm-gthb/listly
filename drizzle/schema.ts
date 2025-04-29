@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, primaryKey } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, primaryKey, unique } from 'drizzle-orm/sqlite-core';
 import { relations, sql } from 'drizzle-orm';
 
 const timestamps = {
@@ -18,12 +18,16 @@ export const users = sqliteTable('users', {
   ...timestamps,
 });
 
-export const passwords = sqliteTable('passwords', {
-  hash: text().notNull(),
-  userId: integer()
-    .references(() => users.id)
-    .notNull(),
-});
+export const passwords = sqliteTable(
+  'passwords',
+  {
+    hash: text().notNull(),
+    userId: integer()
+      .references(() => users.id)
+      .notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.userId] })],
+);
 
 export const listings = sqliteTable('listings', {
   id: integer().primaryKey(),
@@ -77,6 +81,86 @@ export const userRelations = relations(users, ({ one, many }) => ({
   listings: many(listings),
   comments: many(comments),
   password: one(passwords),
+  usersToRoles: many(usersToRoles),
+}));
+
+export const roles = sqliteTable('roles', {
+  id: integer().primaryKey(),
+  name: text().notNull().unique(),
+  description: text().default(''),
+  ...timestamps,
+});
+
+export const rolesRelations = relations(roles, ({ many }) => ({
+  usersToRoles: many(usersToRoles),
+  permissionsToRoles: many(permissionsToRoles),
+}));
+
+export const usersToRoles = sqliteTable(
+  'usersToRoles',
+  {
+    userId: integer()
+      .notNull()
+      .references(() => users.id),
+    roleId: integer()
+      .notNull()
+      .references(() => roles.id),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.roleId] })],
+);
+
+export const usersToRolesRelations = relations(usersToRoles, ({ one }) => ({
+  role: one(roles, {
+    fields: [usersToRoles.roleId],
+    references: [roles.id],
+  }),
+  user: one(users, {
+    fields: [usersToRoles.userId],
+    references: [users.id],
+  }),
+}));
+
+export const permissions = sqliteTable(
+  'permissions',
+  {
+    id: integer().primaryKey(),
+    action: text().notNull(),
+    entity: text().notNull(),
+    access: text().notNull(),
+    description: text().default(''),
+    ...timestamps,
+  },
+  (t) => ({
+    uniqueActionEntityAccess: unique().on(t.action, t.entity, t.access),
+  }),
+);
+
+export const permissionsRelations = relations(permissions, ({ many }) => ({
+  permissionsToRoles: many(permissionsToRoles),
+}));
+
+export const permissionsToRoles = sqliteTable(
+  'permissionsToRoles',
+  {
+    permissionId: integer()
+      .notNull()
+      .references(() => permissions.id),
+    roleId: integer()
+      .notNull()
+      .references(() => roles.id),
+  },
+  (t) => [primaryKey({ columns: [t.permissionId, t.roleId] })],
+);
+
+export const permissionsToRolesRelations = relations(permissionsToRoles, ({ one }) => ({
+  role: one(roles, {
+    fields: [permissionsToRoles.roleId],
+    references: [roles.id],
+  }),
+  permission: one(permissions, {
+    fields: [permissionsToRoles.permissionId],
+    references: [permissions.id],
+  }),
 }));
 
 export const passwordsRelations = relations(passwords, ({ one }) => ({

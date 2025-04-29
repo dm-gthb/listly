@@ -11,7 +11,7 @@ import type { Route } from './+types/root';
 import './app.css';
 import { PageHeader } from './components/page-header';
 import { db } from './utils/db';
-import { getUser } from './utils/auth.server';
+import { getUserWithRolesAndPermissions } from './utils/auth.server';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -33,7 +33,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const categories = await db.query.categories.findMany();
-  const user = await getUser(request);
+  const user = await getUserWithRolesAndPermissions(request);
   return { categories, user };
 }
 
@@ -41,7 +41,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
   const { categories, user } = loaderData;
   return (
     <>
-      <PageHeader categories={categories} user={user} />
+      <PageHeader categories={categories} isAuthenticatedUser={Boolean(user)} />
       <main className="global-container py-8">
         <Outlet />
       </main>

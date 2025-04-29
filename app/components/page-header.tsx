@@ -10,15 +10,15 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { appRoute } from '~/routes';
-import type { Category, User } from 'drizzle/types';
+import type { Category } from 'drizzle/types';
 import { getGroupedCategories } from '~/utils/misc';
 
 export function PageHeader({
   categories,
-  user,
+  isAuthenticatedUser,
 }: {
   categories: Category[];
-  user: User | null | undefined;
+  isAuthenticatedUser: boolean;
 }) {
   const location = useLocation();
   return (
@@ -49,7 +49,7 @@ export function PageHeader({
           </Form>
 
           <div className="flex items-center gap-4 sm:gap-6 lg:gap-8 xl:gap-10">
-            {user ? (
+            {isAuthenticatedUser ? (
               <>
                 <NavLink to={appRoute.myListings}>
                   <Squares2X2Icon width={24} height={24} />

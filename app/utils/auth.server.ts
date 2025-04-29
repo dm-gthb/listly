@@ -50,6 +50,23 @@ export async function getUser(request: Request) {
   return user;
 }
 
+export async function getUserWithRolesAndPermissions(request: Request) {
+  const cookieSession = await getCookieSession(request);
+  const userId = cookieSession.get(userIdCookieKey);
+
+  if (!userId) {
+    return null;
+  }
+
+  const user = await queryUserWithRolesAndPermissions(userId);
+
+  if (!user) {
+    throw await logout(request);
+  }
+
+  return user;
+}
+
 export async function setUserIdCookie({
   request,
   userId,
@@ -106,4 +123,56 @@ export async function signupUser({
 
 async function getCookieSession(request: Request) {
   return await sessionStorage.getSession(request.headers.get('cookie'));
+}
+
+export async function queryUserWithRolesAndPermissions(userId: number) {
+  const user = await db.query.users.findFirst({
+    where: (users, { eq }) => eq(users.id, userId),
+    columns: {
+      id: true,
+      name: true,
+      avatarUrl: true,
+    },
+    with: {
+      usersToRoles: {
+        with: {
+          role: {
+            columns: { name: true },
+            with: {
+              permissionsToRoles: {
+                with: {
+                  permission: {
+                    columns: {
+                      id: true,
+                      action: true,
+                      entity: true,
+                      access: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  return {
+    id: user.id,
+    name: user.name,
+    avatarUrl: user.avatarUrl,
+    roles: user.usersToRoles.map((userRoles) => ({
+      name: userRoles.role.name,
+      permissions: userRoles.role.permissionsToRoles.map((rolePermission) => ({
+        action: rolePermission.permission.action,
+        entity: rolePermission.permission.entity,
+        access: rolePermission.permission.access,
+      })),
+    })),
+  };
 }

@@ -35,10 +35,13 @@ export type ListingWithCategoriesAndAttributes = InferResultType<
   'listings',
   { categories: true; listingAttributes: { with: { attribute: true } } }
 >;
-export type AllCategoriesWithAttribute = InferResultType<'categoryToAttribute', {
-  attribute: {
-    with: {
-      values: true;
+export type AllCategoriesWithAttribute = InferResultType<
+  'categoryToAttribute',
+  {
+    attribute: {
+      with: {
+        values: true;
+      };
     };
-  };
-}>;
+  }
+>;

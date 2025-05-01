@@ -1,5 +1,9 @@
 import { Form, useActionData } from 'react-router';
-import type { Category, ListingWithCategories } from 'drizzle/types';
+import type {
+  AllCategoriesWithAttribute,
+  Category,
+  ListingWithCategoriesAndAttributes,
+} from 'drizzle/types';
 import { z } from 'zod';
 import { getZodConstraint, parseWithZod } from '@conform-to/zod';
 import {
@@ -12,6 +16,40 @@ import {
 import { FormErrorList } from '~/components/form-error-list';
 import { useUser } from '~/utils/user';
 import type { action } from './listing-editor';
+import { useState } from 'react';
+
+export function getListingSchema(
+  categoryAttrs: Array<{
+    attribute: {
+      id: number;
+      inputType: string;
+    };
+  }>,
+) {
+  const baseSchema = z.object({
+    id: z.number().optional(),
+    title: z.string().min(1).max(100),
+    description: z.string().min(1).max(500),
+    sum: z.number().min(0),
+    categoryId: z.number().min(1),
+  });
+
+  if (!categoryAttrs.length) {
+    return baseSchema;
+  }
+
+  // Build dynamic schema for attributes
+  const attributeSchema = z.object(
+    Object.fromEntries(
+      categoryAttrs.map(({ attribute }) => [
+        `attr_${attribute.id}`,
+        attribute.inputType === 'number' ? z.coerce.number() : z.string().min(1),
+      ]),
+    ),
+  );
+
+  return baseSchema.merge(attributeSchema);
+}
 
 export const listingEditorSchema = z.object({
   id: z.number().optional(),
@@ -22,30 +60,49 @@ export const listingEditorSchema = z.object({
 });
 
 export function ListingEditorForm({
-  listing,
   categories,
+  allCategoryAttributes,
+  listing,
 }: {
-  listing?: ListingWithCategories;
   categories: Category[];
+  allCategoryAttributes: AllCategoriesWithAttribute[];
+  listing?: ListingWithCategoriesAndAttributes;
 }) {
+  const initialCategoryId = listing?.categories?.[0].categoryId;
+  const [selectedCategoryId, setSelectedCategoryId] = useState(initialCategoryId);
+
+  // Filter attributes based on selected category
+  const currentAttributes = allCategoryAttributes.filter(
+    (attr) => attr.categoryId === selectedCategoryId,
+  );
+
   const lastResult = useActionData<typeof action>();
   const childCategories = categories.filter((c) => c.parentId !== null);
   const user = useUser();
   const isUnverifiedUser = user.roles.some(({ name }) => name === 'unverified');
 
+  const schema = getListingSchema(currentAttributes);
+
   const [form, fields] = useForm({
     lastResult,
-    constraint: getZodConstraint(listingEditorSchema),
+    constraint: getZodConstraint(schema),
     shouldValidate: 'onBlur',
     shouldRevalidate: 'onInput',
     onValidate({ formData }) {
-      return parseWithZod(formData, { schema: listingEditorSchema });
+      return parseWithZod(formData, { schema });
     },
     defaultValue: {
       title: listing?.title ?? '',
       description: listing?.description ?? '',
       sum: listing?.sum ?? '',
       categoryId: listing?.categories?.[0].categoryId ?? '',
+      ...listing?.listingAttributes.reduce(
+        (acc, attr) => {
+          acc[`attr_${attr.attributeId}`] = attr.value;
+          return acc;
+        },
+        {} as Record<string, string>,
+      ),
     },
   });
 
@@ -56,15 +113,6 @@ export function ListingEditorForm({
     <>
       <h1 className="sr-only">{listing ? 'Edit' : 'Create'} Item</h1>
       <Form method="POST" {...getFormProps(form)}>
-        {/* <div className="mb-6">
-            <input type="file" id="avatar" name="avatar" className="sr-only" />
-            <label
-              htmlFor="avatar"
-              className="flex w-fit cursor-pointer items-center rounded-4xl border border-gray-600 px-4 py-2"
-            >
-              <span>Upload Image</span>
-            </label>
-          </div> */}
         {listing ? <input type="hidden" name="id" value={listing.id} /> : null}
         <div className="mb-10 flex flex-col gap-2">
           <div className="flex flex-col gap-1">
@@ -112,6 +160,9 @@ export function ListingEditorForm({
             <select
               className={`${formControlBaseClassname} border-b`}
               {...getSelectProps(fields.categoryId)}
+              onChange={(e) => {
+                setSelectedCategoryId(Number(e.target.value));
+              }}
             >
               {childCategories.map(({ id, name }) => (
                 <option key={id} value={id}>
@@ -125,6 +176,57 @@ export function ListingEditorForm({
                 errors={fields.categoryId.errors}
               />
             </div>
+          </div>
+
+          <div>
+            <h2 className="mb-4 text-xl font-semibold">Attributes</h2>
+            {currentAttributes.map(({ attribute }) => {
+              const currentValue =
+                listing?.listingAttributes.find((la) => la.attributeId === attribute.id)
+                  ?.value ?? '';
+              const fieldName = `attr_${attribute.id}`;
+
+              return (
+                <div key={attribute.id} className="mb-4">
+                  <label className="mb-1 block font-medium text-gray-700">
+                    {attribute.name}
+                  </label>
+                  {attribute.inputType === 'select' ? (
+                    <select
+                      name={fieldName}
+                      defaultValue={currentValue}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    >
+                      <option value="">Select {attribute.name}</option>
+                      {attribute.values?.map((value: { id: number; value: string }) => (
+                        <option key={value.id} value={value.value}>
+                          {value.value}
+                        </option>
+                      ))}
+                    </select>
+                  ) : attribute.inputType === 'number' ? (
+                    <div className="flex items-center">
+                      <input
+                        type="number"
+                        name={fieldName}
+                        defaultValue={currentValue}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      />
+                      {attribute.unit && (
+                        <span className="ml-2 text-gray-500">{attribute.unit}</span>
+                      )}
+                    </div>
+                  ) : (
+                    <input
+                      type="text"
+                      name={fieldName}
+                      defaultValue={currentValue}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 

@@ -31,3 +31,14 @@ export type User = typeof schema.users.$inferSelect;
 export type Category = typeof schema.categories.$inferSelect;
 export type Comment = typeof schema.comments.$inferSelect;
 export type ListingWithCategories = InferResultType<'listings', { categories: true }>;
+export type ListingWithCategoriesAndAttributes = InferResultType<
+  'listings',
+  { categories: true; listingAttributes: { with: { attribute: true } } }
+>;
+export type AllCategoriesWithAttribute = InferResultType<'categoryToAttribute', {
+  attribute: {
+    with: {
+      values: true;
+    };
+  };
+}>;

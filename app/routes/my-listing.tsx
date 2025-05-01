@@ -21,15 +21,19 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await requireUser(request);
 
   const listing = await db.query.listings.findFirst({
-    where: (lisings, { eq, and }) =>
-      and(eq(lisings.id, +id), eq(lisings.ownerId, user.id)),
+    where: (listings, { eq, and }) =>
+      and(eq(listings.id, +id), eq(listings.ownerId, user.id)),
     with: {
       categories: {
         with: {
           category: true,
         },
       },
-      comments: true,
+      listingAttributes: {
+        with: {
+          attribute: true,
+        },
+      },
     },
   });
 
@@ -84,6 +88,7 @@ export default function MyListing({ loaderData }: Route.ComponentProps) {
       categories,
       createdAt,
       updatedAt,
+      listingAttributes,
     },
   } = loaderData;
   return (
@@ -93,7 +98,7 @@ export default function MyListing({ loaderData }: Route.ComponentProps) {
         {images.map((src, i) => (
           <img
             key={src + i}
-            className="block max-w-[200px]"
+            className="block h-[150px]"
             src={src}
             alt={`image ${i} of ${title}`}
           />
@@ -110,14 +115,22 @@ export default function MyListing({ loaderData }: Route.ComponentProps) {
         </thead>
         <tbody>
           <tr>
-            <td className="border p-2">Condition</td>
-            <td className="border p-2 capitalize">{condition}</td>
-          </tr>
-          <tr>
             <td className="border p-2">Categories</td>
             <td className="border p-2 capitalize">
               {categories.map(({ name }) => name).join(', ')}
             </td>
+          </tr>
+          {listingAttributes?.map(({ attribute, value }) => (
+            <tr key={attribute.id}>
+              <td className="border p-2">{attribute.name}</td>
+              <td className="border p-2 capitalize">
+                {value} {attribute.unit}
+              </td>
+            </tr>
+          ))}
+          <tr>
+            <td className="border p-2">Condition</td>
+            <td className="border p-2 capitalize">{condition}</td>
           </tr>
           <tr>
             <td className="border p-2 pr-4">Created</td>

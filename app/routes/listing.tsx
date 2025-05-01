@@ -16,7 +16,11 @@ export async function loader({ params }: Route.LoaderArgs) {
           category: true,
         },
       },
-      comments: true,
+      listingAttributes: {
+        with: {
+          attribute: true,
+        },
+      },
     },
   });
 
@@ -34,7 +38,16 @@ export async function loader({ params }: Route.LoaderArgs) {
 
 export default function Listing({ loaderData }: Route.ComponentProps) {
   const {
-    listing: { title, description, images, sum, createdAt, condition, categories },
+    listing: {
+      title,
+      description,
+      images,
+      sum,
+      createdAt,
+      condition,
+      categories,
+      listingAttributes,
+    },
   } = loaderData;
   return (
     <>
@@ -63,21 +76,29 @@ export default function Listing({ loaderData }: Route.ComponentProps) {
       <table className="mb-8">
         <thead>
           <tr className="sr-only">
-            <th className="pr-2">Property</th>
+            <th className="pr-10">Property</th>
             <th>Value</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td className="pr-4 text-gray-600">Condition</td>
+            <td className="pr-10 pb-1 text-gray-600">Condition</td>
             <td className="capitalize">{condition}</td>
           </tr>
           <tr>
-            <td className="pr-4 text-gray-600">Categories</td>
+            <td className="pr-10 pb-1 text-gray-600">Categories</td>
             <td>{categories.map(({ name }) => name).join(', ')}</td>
           </tr>
+          {listingAttributes.map(({ attribute, value }) => (
+            <tr key={attribute.id}>
+              <td className="pr-10 pb-1 text-gray-600">{attribute.name}</td>
+              <td>
+                {value} {attribute.unit}
+              </td>
+            </tr>
+          ))}
           <tr>
-            <td className="pr-4 text-gray-600">Posted</td>
+            <td className="pr-10 pb-1 text-gray-600">Posted</td>
             <td>{formatDate(createdAt)}</td>
           </tr>
         </tbody>

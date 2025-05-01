@@ -39,6 +39,7 @@ export async function action({ request }: ActionFunctionArgs) {
     description,
     sum,
     categoryId: newCategoryId,
+    condition,
     ...attrs
   } = submission.value;
 
@@ -90,7 +91,7 @@ export async function action({ request }: ActionFunctionArgs) {
       title: String(title),
       description: String(description),
       sum: Number(sum),
-      condition: 'new', // Default condition, todo:update
+      condition: String(condition),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       ownerId: user.id,

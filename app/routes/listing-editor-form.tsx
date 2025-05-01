@@ -32,13 +32,13 @@ export function getListingSchema(
     description: z.string().min(1).max(500),
     sum: z.number().min(0),
     categoryId: z.number().min(1),
+    condition: z.enum(['new', 'used']),
   });
 
   if (!categoryAttrs.length) {
     return baseSchema;
   }
 
-  // Build dynamic schema for attributes
   const attributeSchema = z.object(
     Object.fromEntries(
       categoryAttrs.map(({ attribute }) => [
@@ -51,14 +51,6 @@ export function getListingSchema(
   return baseSchema.merge(attributeSchema);
 }
 
-export const listingEditorSchema = z.object({
-  id: z.number().optional(),
-  title: z.string().min(1).max(100),
-  description: z.string().min(1).max(500),
-  sum: z.number().min(0),
-  categoryId: z.number().min(1),
-});
-
 export function ListingEditorForm({
   categories,
   allCategoryAttributes,
@@ -70,8 +62,6 @@ export function ListingEditorForm({
 }) {
   const initialCategoryId = listing?.categories?.[0].categoryId;
   const [selectedCategoryId, setSelectedCategoryId] = useState(initialCategoryId);
-
-  // Filter attributes based on selected category
   const currentAttributes = allCategoryAttributes.filter(
     (attr) => attr.categoryId === selectedCategoryId,
   );
@@ -96,6 +86,7 @@ export function ListingEditorForm({
       description: listing?.description ?? '',
       sum: listing?.sum ?? '',
       categoryId: listing?.categories?.[0].categoryId ?? '',
+      condition: listing?.condition ?? '',
       ...listing?.listingAttributes.reduce(
         (acc, attr) => {
           acc[`attr_${attr.attributeId}`] = attr.value;
@@ -114,7 +105,7 @@ export function ListingEditorForm({
       <h1 className="sr-only">{listing ? 'Edit' : 'Create'} Item</h1>
       <Form method="POST" {...getFormProps(form)}>
         {listing ? <input type="hidden" name="id" value={listing.id} /> : null}
-        <div className="mb-10 flex flex-col gap-2">
+        <div className="mb-10 flex flex-col gap-3">
           <div className="flex flex-col gap-1">
             <label htmlFor={fields.title.id}>Title</label>
             <input
@@ -154,6 +145,24 @@ export function ListingEditorForm({
           </div>
 
           <div className="flex flex-col gap-1">
+            <label htmlFor={fields.condition.id}>Condition</label>
+            <select
+              className={`${formControlBaseClassname} border-b`}
+              {...getSelectProps(fields.condition)}
+            >
+              <option value="">Select condition</option>
+              <option value="new">New</option>
+              <option value="used">Used</option>
+            </select>
+            <div className="min-h-6">
+              <FormErrorList
+                id={fields.condition.errorId}
+                errors={fields.condition.errors}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
             <label className="" htmlFor={fields.categoryId.id}>
               Category
             </label>
@@ -164,6 +173,7 @@ export function ListingEditorForm({
                 setSelectedCategoryId(Number(e.target.value));
               }}
             >
+              <option value="">Select category</option>
               {childCategories.map(({ id, name }) => (
                 <option key={id} value={id}>
                   {name}
@@ -178,24 +188,21 @@ export function ListingEditorForm({
             </div>
           </div>
 
-          <div>
-            <h2 className="mb-4 text-xl font-semibold">Attributes</h2>
+          <>
             {currentAttributes.map(({ attribute }) => {
-              const currentValue =
-                listing?.listingAttributes.find((la) => la.attributeId === attribute.id)
-                  ?.value ?? '';
               const fieldName = `attr_${attribute.id}`;
-
               return (
-                <div key={attribute.id} className="mb-4">
-                  <label className="mb-1 block font-medium text-gray-700">
+                <div key={attribute.id} className="flex flex-col gap-1">
+                  <label
+                    htmlFor={fields[fieldName].id}
+                    className="mb-1 block font-medium text-gray-700"
+                  >
                     {attribute.name}
                   </label>
                   {attribute.inputType === 'select' ? (
                     <select
-                      name={fieldName}
-                      defaultValue={currentValue}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      {...getSelectProps(fields[fieldName])}
+                      className={`${formControlBaseClassname} border-b`}
                     >
                       <option value="">Select {attribute.name}</option>
                       {attribute.values?.map((value: { id: number; value: string }) => (
@@ -207,10 +214,8 @@ export function ListingEditorForm({
                   ) : attribute.inputType === 'number' ? (
                     <div className="flex items-center">
                       <input
-                        type="number"
-                        name={fieldName}
-                        defaultValue={currentValue}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        {...getInputProps(fields[fieldName], { type: 'number' })}
+                        className={inputClassname}
                       />
                       {attribute.unit && (
                         <span className="ml-2 text-gray-500">{attribute.unit}</span>
@@ -218,16 +223,20 @@ export function ListingEditorForm({
                     </div>
                   ) : (
                     <input
-                      type="text"
-                      name={fieldName}
-                      defaultValue={currentValue}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      {...getInputProps(fields[fieldName], { type: 'text' })}
+                      className={inputClassname}
                     />
                   )}
+                  <div className="min-h-6">
+                    <FormErrorList
+                      id={fields[fieldName].errorId}
+                      errors={fields[fieldName].errors}
+                    />
+                  </div>
                 </div>
               );
             })}
-          </div>
+          </>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">

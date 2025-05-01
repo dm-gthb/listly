@@ -204,6 +204,7 @@ export const listingRelations = relations(listings, ({ one, many }) => ({
   }),
   comments: many(comments),
   categories: many(listingToCategory),
+  listingAttributes: many(listingAttributes),
 }));
 
 export const commentRelations = relations(comments, ({ one }) => ({
@@ -229,5 +230,104 @@ export const listingToCategoryRelations = relations(listingToCategory, ({ one })
   category: one(categories, {
     fields: [listingToCategory.categoryId],
     references: [categories.id],
+  }),
+}));
+
+// ATTRIBUTES AND ITS RELATIONS WITH LISTINGS AND CATEGORIES
+// Attribute definitions (metadata about attributes like 'RAM', 'Color')
+export const attributes = sqliteTable('attributes', {
+  id: integer().primaryKey(),
+  name: text().notNull(), // 'RAM'
+  slug: text().notNull().unique(), // 'ram'
+  inputType: text().notNull(), // 'number', 'select', etc.
+  unit: text(), // optional unit: 'GB', 'cm'
+  ...timestamps,
+});
+
+// Available values for select-like attributes (e.g., "Silver", "Black")
+export const attributeValues = sqliteTable('attributeValues', {
+  id: integer().primaryKey(),
+  attributeId: integer()
+    .notNull()
+    .references(() => attributes.id, {
+      onDelete: 'cascade',
+      onUpdate: 'cascade',
+    }),
+  value: text().notNull(),
+});
+
+// Mapping which attributes belong to which category (e.g., Laptops → RAM, Storage)
+export const categoryToAttribute = sqliteTable(
+  'categoryToAttribute',
+  {
+    categoryId: integer()
+      .notNull()
+      .references(() => categories.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
+    attributeId: integer()
+      .notNull()
+      .references(() => attributes.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
+  },
+  (t) => [primaryKey({ columns: [t.categoryId, t.attributeId] })],
+);
+
+// Actual attribute values for a listing (e.g., listing #1 has RAM = 16)
+export const listingAttributes = sqliteTable(
+  'listingAttributes',
+  {
+    listingId: integer()
+      .notNull()
+      .references(() => listings.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
+    attributeId: integer()
+      .notNull()
+      .references(() => attributes.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
+    value: text().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.listingId, t.attributeId] })],
+);
+
+// relations
+export const attributeRelations = relations(attributes, ({ many }) => ({
+  values: many(attributeValues),
+  listingAttributes: many(listingAttributes),
+}));
+
+export const attributeValueRelations = relations(attributeValues, ({ one }) => ({
+  attribute: one(attributes, {
+    fields: [attributeValues.attributeId],
+    references: [attributes.id],
+  }),
+}));
+
+export const listingAttributesRelations = relations(listingAttributes, ({ one }) => ({
+  listing: one(listings, {
+    fields: [listingAttributes.listingId],
+    references: [listings.id],
+  }),
+  attribute: one(attributes, {
+    fields: [listingAttributes.attributeId],
+    references: [attributes.id],
+  }),
+}));
+
+export const categoryToAttributeRelations = relations(categoryToAttribute, ({ one }) => ({
+  category: one(categories, {
+    fields: [categoryToAttribute.categoryId],
+    references: [categories.id],
+  }),
+  attribute: one(attributes, {
+    fields: [categoryToAttribute.attributeId],
+    references: [attributes.id],
   }),
 }));

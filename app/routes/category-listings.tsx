@@ -183,13 +183,13 @@ export default function CategoryListings({ loaderData }: Route.ComponentProps) {
   return (
     <>
       <h1 className="title">{categoryName}</h1>
-      <div className="flex grow-1 gap-2">
+      <div className="flex grow-1 gap-8 lg:gap-6 xl:gap-8">
         <Form
           method="get"
           {...getFormProps(form)}
-          className="flex w-[300px] shrink-0 flex-col"
+          className="flex w-[220px] shrink-0 flex-col lg:w-[300px]"
         >
-          <div className="rounded-lg bg-white p-8 shadow-md">
+          <div className="mb-2 rounded-lg bg-white p-4 py-4 shadow-md lg:p-7 lg:shadow-lg">
             <div className="mb-6 flex flex-col gap-1">
               <label className="font-bold" htmlFor={fields.sortBy.id}>
                 Sort by

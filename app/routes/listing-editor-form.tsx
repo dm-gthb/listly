@@ -197,7 +197,7 @@ export function ListingEditorForm({
                     htmlFor={fields[fieldName].id}
                     className="mb-1 block font-medium text-gray-700"
                   >
-                    {attribute.name}
+                    {attribute.name} {attribute.unit ? `(${attribute.unit})` : ''}
                   </label>
                   {attribute.inputType === 'select' ? (
                     <select
@@ -205,9 +205,9 @@ export function ListingEditorForm({
                       className={`${formControlBaseClassname} border-b`}
                     >
                       <option value="">Select {attribute.name}</option>
-                      {attribute.values?.map((value: { id: number; value: string }) => (
-                        <option key={value.id} value={value.value}>
-                          {value.value}
+                      {attribute.values?.map(({ id, value }) => (
+                        <option key={id} value={value}>
+                          {value}
                         </option>
                       ))}
                     </select>

@@ -66,7 +66,7 @@ export async function action({ request }: Route.ActionArgs) {
   const cookieSession = await sessionStorage.getSession(request.headers.get('cookie'));
   cookieSession.set('userId', user.id);
 
-  return redirect('/', {
+  return redirect('/my/listings', {
     headers: {
       'set-cookie': await sessionStorage.commitSession(cookieSession, {
         expires: getSessionExpirationDate(),

@@ -3,7 +3,6 @@ import { Form, Link, NavLink, useLocation } from 'react-router';
 import * as Dialog from '@radix-ui/react-dialog';
 import {
   ArrowRightStartOnRectangleIcon,
-  ChatBubbleLeftIcon,
   HomeIcon,
   MagnifyingGlassIcon,
   Squares2X2Icon,
@@ -47,7 +46,7 @@ export function PageHeader({
               <input
                 type="text"
                 name="q"
-                className="w-full grow-1 rounded-full border-2 border-gray-500 px-6 py-2 pr-12 text-base disabled:text-gray-400"
+                className="w-full grow-1 rounded-full border-2 border-gray-500 px-6 py-2.5 pr-12 text-base disabled:text-gray-400"
                 placeholder="Search for anything"
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
@@ -68,10 +67,6 @@ export function PageHeader({
                 <NavLink to={appRoute.myListings}>
                   <Squares2X2Icon width={24} height={24} />
                   <span className="sr-only">My listings</span>
-                </NavLink>
-                <NavLink to={appRoute.myListingComments}>
-                  <ChatBubbleLeftIcon width={24} height={24} />
-                  <span className="sr-only">Comments</span>
                 </NavLink>
                 <Form
                   method="POST"
@@ -124,7 +119,7 @@ function AllCategoriesMenu({
                 return null;
               }
               return (
-                <div>
+                <div key={parentCategory.id}>
                   <h3 className="mb-2 font-bold">{parentCategory.name}</h3>
                   <ul className="">
                     {parentCategory.children.map(({ id, name }) => (

@@ -104,7 +104,7 @@ export default function Listing({ loaderData }: Route.ComponentProps) {
         <div>
           <p className="font-bold">{owner.name}</p>
           {isAuth ? (
-            <p className="text-sm text-gray-500">Contact: {owner.email}</p>
+            <p className="text-gray-500">Contact: {owner.email}</p>
           ) : (
             <Link className="underline" to={appRoute.login}>
               Login to contact the seller

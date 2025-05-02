@@ -30,11 +30,19 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   const groupedCategories = getGroupedCategories(categories);
   return (
     <>
-      <div className="relative -mt-6 mb-6 flex items-center justify-items-start gap-8">
-        <div className="">
-          <SelectedCategoriesMenu categories={groupedCategories} />
+      <div className="relative -mt-6 mb-2 flex items-center justify-items-start gap-8">
+        <div className="hidden lg:block">
+          <SelectedCategoriesMenu categories={groupedCategories.slice(0, 7)} />
         </div>
       </div>
+      <section
+        className="mb-10 flex h-[360px] flex-col justify-center rounded-2xl bg-[url('https://picsum.photos/seed/listly/1200/800')] bg-cover bg-center bg-no-repeat p-20 text-white"
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', backgroundBlendMode: 'overlay' }}
+      >
+        <h2 className="title font-bold">Welcome to Listly</h2>
+        <p className="text-lg">Buy, sell, and discover great deals in your community.</p>
+        <p className="text-lg">List your items or find what you need—fast and easy.</p>
+      </section>
       <section className="mb-8">
         <h2 className="title">Latest Listings</h2>
         <ListingsGrid listings={latestListings} />
@@ -67,7 +75,7 @@ function SelectedCategoriesMenu({
                   strokeWidth={3}
                 />
               </NavigationMenu.Trigger>
-              <NavigationMenu.Content className="absolute top-10 -left-4 z-1 w-max min-w-[calc(100%+2rem)] rounded-md bg-white px-2 py-2 shadow-xl">
+              <NavigationMenu.Content className="absolute top-10 -left-4 z-1 w-max min-w-[calc(100%+2.5rem)] rounded-md bg-white p-3 shadow-xl">
                 <ul className="shrink-0">
                   {parentCategory.children.map(({ id, name }) => (
                     <li key={id}>

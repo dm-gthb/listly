@@ -33,15 +33,19 @@ export function PageHeader({
             key={location.key}
             categories={getGroupedCategories(categories)}
           />
-          <Form className="flex grow-1 gap-2">
+          <Form className="flex grow-1 gap-2" method="GET" action={appRoute.search}>
             <div className="relative w-full">
               <input
                 type="text"
+                name="q"
                 className="w-full grow-1 rounded-full border-2 border-gray-500 px-6 py-2 pr-12 text-base disabled:text-gray-400"
                 placeholder="Search for anything"
               />
 
-              <button className="absolute top-[50%] right-3 -translate-y-[50%] cursor-pointer p-3 text-gray-600 transition hover:text-gray-950 disabled:hover:text-gray-400">
+              <button
+                type="submit"
+                className="absolute top-[50%] right-3 -translate-y-[50%] cursor-pointer p-3 text-gray-600 transition hover:text-gray-950 disabled:hover:text-gray-400"
+              >
                 <MagnifyingGlassIcon width={24} height={24} strokeWidth={2} />
                 <span className="sr-only">search</span>
               </button>

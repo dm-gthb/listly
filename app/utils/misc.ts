@@ -47,3 +47,10 @@ export function getGroupedCategories(categories: Category[]) {
     children: children.filter(({ parentId }) => parentId === parent.id),
   }));
 }
+
+export function prefetchImage(src: string | null) {
+  if (src) {
+    const img = new Image();
+    img.src = src;
+  }
+}

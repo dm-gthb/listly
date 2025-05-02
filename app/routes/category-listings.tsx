@@ -287,9 +287,9 @@ function ListingCard({ listing }: { listing: Listing }) {
       to={`${appRoute.listing}/${id}`}
       className="group mb-4 gap-4 border-b border-gray-200 p-3 transition-opacity hover:bg-gray-100 lg:mb-0 lg:flex lg:rounded-lg lg:border-none lg:p-8"
     >
-      <div className="mb-2 w-[200px] shrink-0 overflow-hidden rounded-md lg:mb-0">
+      <div className="mb-2 flex h-[130px] max-w-1/3 min-w-[195px] shrink-0 justify-center overflow-hidden rounded-md bg-gray-100 lg:mb-0">
         <img
-          className="block object-cover transition-opacity group-hover:opacity-90"
+          className="max-h-full max-w-full object-fill object-center"
           src={images[0]}
           alt={`${title} image`}
         />

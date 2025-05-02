@@ -1,4 +1,5 @@
-import { Form, Link, NavLink, useLocation, useNavigate } from 'react-router';
+import { useState, useEffect } from 'react';
+import { Form, Link, NavLink, useLocation } from 'react-router';
 import * as Dialog from '@radix-ui/react-dialog';
 import {
   ArrowRightStartOnRectangleIcon,
@@ -21,6 +22,14 @@ export function PageHeader({
   isAuthenticatedUser: boolean;
 }) {
   const location = useLocation();
+  const [searchValue, setSearchValue] = useState('');
+
+  useEffect(() => {
+    if (location.pathname !== appRoute.search) {
+      setSearchValue('');
+    }
+  }, [location.pathname]);
+
   return (
     <header>
       <div className="border-b border-gray-300">
@@ -40,8 +49,9 @@ export function PageHeader({
                 name="q"
                 className="w-full grow-1 rounded-full border-2 border-gray-500 px-6 py-2 pr-12 text-base disabled:text-gray-400"
                 placeholder="Search for anything"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
               />
-
               <button
                 type="submit"
                 className="absolute top-[50%] right-3 -translate-y-[50%] cursor-pointer p-3 text-gray-600 transition hover:text-gray-950 disabled:hover:text-gray-400"

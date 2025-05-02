@@ -14,9 +14,10 @@ import {
   useForm,
 } from '@conform-to/react';
 import { FormErrorList } from '~/components/form-error-list';
-import { useUser } from '~/utils/user';
 import type { action } from './listing-editor';
 import { useState } from 'react';
+import { useReadOnlyUserRole } from '~/utils/user';
+import { UserRoleAlert } from '~/components/user-role-alert';
 
 export function getListingSchema(
   categoryAttrs: Array<{
@@ -68,8 +69,7 @@ export function ListingEditorForm({
 
   const lastResult = useActionData<typeof action>();
   const childCategories = categories.filter((c) => c.parentId !== null);
-  const user = useUser();
-  const isUnverifiedUser = user.roles.some(({ name }) => name === 'unverified');
+  const readOnlyUserRole = useReadOnlyUserRole();
 
   const schema = getListingSchema(currentAttributes);
 
@@ -240,14 +240,12 @@ export function ListingEditorForm({
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          {isUnverifiedUser ? (
-            <button
-              type="button"
-              className="button-base"
-              onClick={() => alert('Not Allowed. Current user role: Unverified')}
-            >
-              Submit
-            </button>
+          {readOnlyUserRole ? (
+            <UserRoleAlert role={readOnlyUserRole}>
+              <button type="button" className="button-base">
+                Submit
+              </button>
+            </UserRoleAlert>
           ) : (
             <button type="submit" className="button-base">
               Submit

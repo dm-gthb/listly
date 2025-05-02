@@ -11,6 +11,8 @@ import { FormErrorList } from '~/components/form-error-list';
 import { eq } from 'drizzle-orm';
 import { listings } from 'drizzle/schema';
 import { appRoute } from '~/routes';
+import { useReadOnlyUserRole } from '~/utils/user';
+import { UserRoleAlert } from '~/components/user-role-alert';
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const id = params.listingId;
@@ -91,6 +93,7 @@ export default function MyListing({ loaderData }: Route.ComponentProps) {
       listingAttributes,
     },
   } = loaderData;
+  const readOnlyUserRole = useReadOnlyUserRole();
   return (
     <div className="flex flex-col gap-4">
       <h1 className="title mb-0">{title}</h1>
@@ -149,7 +152,18 @@ export default function MyListing({ loaderData }: Route.ComponentProps) {
         >
           Edit
         </Link>
-        <DeleteListing id={id} />
+        {readOnlyUserRole ? (
+          <UserRoleAlert role={readOnlyUserRole}>
+            <button
+              type="button"
+              className="button-base w-fit min-w-[150px] bg-red-600 py-2.5 text-white hover:opacity-90"
+            >
+              Delete
+            </button>
+          </UserRoleAlert>
+        ) : (
+          <DeleteListing id={id} />
+        )}
       </div>
     </div>
   );

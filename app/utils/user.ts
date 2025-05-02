@@ -15,3 +15,10 @@ export function useUser() {
   }
   return maybeUser;
 }
+
+export function useReadOnlyUserRole() {
+  const user = useUser();
+  const isDemoUser = user.roles.some(({ name }) => name === 'demo');
+  const isUnverifiedUser = user.roles.some(({ name }) => name === 'unverified');
+  return isDemoUser ? 'demo' : isUnverifiedUser ? 'unverified' : null;
+}

@@ -21,6 +21,8 @@
     "@conform-to/react": "^1.4.0",
     "@conform-to/zod": "^1.4.0",
     "@heroicons/react": "^2.2.0",
+    "@oslojs/crypto": "^1.0.1",
+    "@oslojs/encoding": "^1.1.0",
     "@radix-ui/react-dialog": "^1.1.11",
     "@radix-ui/react-navigation-menu": "^1.2.7",
     "bcryptjs": "^3.0.2",
@@ -30,6 +32,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router": "^7.5.0",
+    "remix-utils": "^8.5.0",
     "zod": "^3.24.3"
   },
   "devDependencies": {

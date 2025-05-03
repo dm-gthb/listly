@@ -14,6 +14,8 @@ import {
   signupUser,
 } from '~/utils/auth.server';
 import { sessionStorage } from '~/utils/session.server';
+import { validateCSRF } from '~/utils/csrf.server';
+import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 
 const signupSchema = z.object({
   name: z
@@ -31,6 +33,7 @@ const signupSchema = z.object({
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
+  await validateCSRF(formData, request.headers);
 
   const submission = await parseWithZod(formData, {
     schema: signupSchema
@@ -101,13 +104,8 @@ export default function Register({ actionData }: Route.ComponentProps) {
       <div className="mb-4 w-full sm:w-96">
         <div>
           <Form method="POST" {...getFormProps(form)}>
+            <AuthenticityTokenInput />
             <fieldset disabled={false}>
-              {/* <div className="mb-6">
-                <input type="file" id="avatar" name="avatar" className="sr-only" />
-                <label htmlFor="avatar" className="button-file">
-                  <span>Upload Image</span>
-                </label>
-              </div> */}
               <div className={classNames.formGroup}>
                 <label htmlFor="username">Name</label>
                 <input

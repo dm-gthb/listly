@@ -13,6 +13,8 @@ import { listings } from 'drizzle/schema';
 import { appRoute } from '~/routes';
 import { useReadOnlyUserRole } from '~/utils/user';
 import { UserRoleAlert } from '~/components/user-role-alert';
+import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
+import { validateCSRF } from '~/utils/csrf.server';
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const id = params.listingId;
@@ -56,6 +58,8 @@ const deleteListingSchema = z.object({
 });
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
+  await validateCSRF(formData, request.headers);
+
   const submission = parseWithZod(formData, {
     schema: deleteListingSchema,
   });
@@ -182,6 +186,7 @@ function DeleteListing({ id }: { id: number }) {
   return (
     <Form method="POST" {...getFormProps(form)}>
       <input {...getInputProps(fields.listingId, { type: 'hidden' })} value={id} />
+      <AuthenticityTokenInput />
       <button
         type="submit"
         className="button-base w-fit min-w-[150px] bg-red-600 py-2.5 text-white hover:opacity-90"

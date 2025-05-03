@@ -1,17 +1,20 @@
 import {
+  data,
   isRouteErrorResponse,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from 'react-router';
-
 import type { Route } from './+types/root';
 import './app.css';
 import { PageHeader } from './components/page-header';
 import { db } from './utils/db.server';
 import { getUserWithRolesAndPermissions } from './utils/auth.server';
+import { csrf } from './utils/csrf.server';
+import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -32,12 +35,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
+  const [csrfToken, cookieHeader] = await csrf.commitToken(request);
   const categories = await db.query.categories.findMany();
   const user = await getUserWithRolesAndPermissions(request);
-  return { categories, user };
+  return data(
+    {
+      categories,
+      user,
+      csrfToken,
+    },
+    {
+      headers: cookieHeader
+        ? {
+            'Set-Cookie': cookieHeader,
+          }
+        : {},
+    },
+  );
 }
 
-export default function App({ loaderData }: Route.ComponentProps) {
+function App() {
+  const loaderData = useLoaderData<typeof loader>();
   const { categories, user } = loaderData;
   return (
     <>
@@ -46,6 +64,15 @@ export default function App({ loaderData }: Route.ComponentProps) {
         <Outlet />
       </main>
     </>
+  );
+}
+
+export default function AppWithProviders() {
+  const loaderData = useLoaderData<typeof loader>();
+  return (
+    <AuthenticityTokenProvider token={loaderData.csrfToken}>
+      <App />
+    </AuthenticityTokenProvider>
   );
 }
 

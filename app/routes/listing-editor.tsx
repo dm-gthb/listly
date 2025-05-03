@@ -6,12 +6,13 @@ import { db } from '~/utils/db.server';
 import { appRoute } from '~/routes';
 import { requireUserWithPermission } from '~/utils/permissions.server';
 import { getListingSchema } from './listing-editor-form';
+import { validateCSRF } from '~/utils/csrf.server';
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
-  const categoryId = Number(formData.get('categoryId'));
+  await validateCSRF(formData, request.headers);
 
-  // Get attributes for the category
+  const categoryId = Number(formData.get('categoryId'));
   const categoryAttrs = await db.query.categoryToAttribute.findMany({
     where: (categoryToAttribute, { eq }) =>
       eq(categoryToAttribute.categoryId, categoryId),
@@ -50,7 +51,6 @@ export async function action({ request }: ActionFunctionArgs) {
   );
 
   if (isUpdate) {
-    // Update listing with core fields
     await db
       .update(listings)
       .set({
@@ -69,7 +69,6 @@ export async function action({ request }: ActionFunctionArgs) {
       categoryId: Number(newCategoryId),
     });
 
-    // Update attributes
     const attributeEntries = Object.entries(attrs).map(([key, value]) => ({
       listingId: Number(id),
       attributeId: parseInt(key.replace('attr_', '')),
@@ -84,7 +83,6 @@ export async function action({ request }: ActionFunctionArgs) {
     return redirect(`${appRoute.myListings}/${id}`);
   }
 
-  // Create listing
   const [listing] = await db
     .insert(listings)
     .values({
@@ -99,13 +97,11 @@ export async function action({ request }: ActionFunctionArgs) {
     })
     .returning();
 
-  // Create category relationship
   await db.insert(listingToCategory).values({
     listingId: listing.id,
     categoryId: Number(newCategoryId),
   });
 
-  // Create attributes
   const attributeEntries = Object.entries(attrs).map(([key, value]) => ({
     listingId: listing.id,
     attributeId: parseInt(key.replace('attr_', '')),

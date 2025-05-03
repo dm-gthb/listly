@@ -18,6 +18,7 @@ import type { action } from './listing-editor';
 import { useState } from 'react';
 import { useReadOnlyUserRole } from '~/utils/user';
 import { UserRoleAlert } from '~/components/user-role-alert';
+import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 
 export function getListingSchema(
   categoryAttrs: Array<{
@@ -104,6 +105,7 @@ export function ListingEditorForm({
     <>
       <h1 className="sr-only">{listing ? 'Edit' : 'Create'} Item</h1>
       <Form method="POST" {...getFormProps(form)}>
+        <AuthenticityTokenInput />
         {listing ? <input type="hidden" name="id" value={listing.id} /> : null}
         <div className="mb-10 flex flex-col gap-3">
           <div className="flex flex-col gap-1">

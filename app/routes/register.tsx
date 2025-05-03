@@ -16,6 +16,8 @@ import {
 import { sessionStorage } from '~/utils/session.server';
 import { validateCSRF } from '~/utils/csrf.server';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
+import { validateHoneypot } from '~/utils/honeypot.server';
+import { HoneypotInputs } from 'remix-utils/honeypot/react';
 
 const signupSchema = z.object({
   name: z
@@ -34,6 +36,7 @@ const signupSchema = z.object({
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
   await validateCSRF(formData, request.headers);
+  await validateHoneypot(formData);
 
   const submission = await parseWithZod(formData, {
     schema: signupSchema
@@ -105,6 +108,7 @@ export default function Register({ actionData }: Route.ComponentProps) {
         <div>
           <Form method="POST" {...getFormProps(form)}>
             <AuthenticityTokenInput />
+            <HoneypotInputs />
             <fieldset disabled={false}>
               <div className={classNames.formGroup}>
                 <label htmlFor="username">Name</label>

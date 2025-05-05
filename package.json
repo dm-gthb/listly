@@ -13,8 +13,9 @@
     "format": "prettier --write \"**/*.+(js|ts|tsx|json|css|html)\"",
     "db:generate": "drizzle-kit generate --config drizzle.config.ts",
     "db:migrate": "wrangler d1 migrations apply --local DB",
+    "db:migrate-production": "wrangler d1 migrations apply --remote",
     "db:seed": "wrangler d1 execute --local --file=./drizzle/seed.sql",
-    "db:migrate-production": "wrangler d1 migrations apply",
+    "db:seed-production": "wrangler d1 execute --remote --file=./drizzle/seed.sql",
     "db:drop": "rm -rf ./.wrangler"
   },
   "dependencies": {

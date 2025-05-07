@@ -15,7 +15,7 @@
     "db:migrate": "wrangler d1 migrations apply --local DB",
     "db:migrate-production": "wrangler d1 migrations apply --remote",
     "db:seed": "wrangler d1 execute --local --file=./drizzle/seed.sql",
-    "db:seed-production": "wrangler d1 execute --remote --file=./drizzle/seed.sql",
+    "db:seed-production": "wrangler d1 execute --remote --file=./drizzle/seed--production.sql",
     "db:drop": "rm -rf ./.wrangler"
   },
   "dependencies": {

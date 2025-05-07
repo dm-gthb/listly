@@ -38,7 +38,7 @@ export function UserRoleAlert({
                   💡 To explore how a verified user dashboard looks, browse pre-created
                   listings, and interact with forms,{' '}
                   <span className="font-bold">log in as demo user</span>:{' '}
-                  <MonoText>demo_user@example.com</MonoText> /{' '}
+                  <MonoText>demo@demo.com</MonoText> /{' '}
                   <MonoText>password123</MonoText>
                 </p>
               </>

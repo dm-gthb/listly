@@ -1,11 +1,12 @@
 # Listly
 
 **Listly** is a full-stack web application that allows users to buy and sell items.
+
 **Demo**: [https://listly.dmbx.workers.dev/](https://listly.dmbx.workers.dev/)
 
 To explore how a verified user dashboard looks, browse pre-created listings, and interact with forms, log in as a demo user:
-- **Email**: demo@demo.com
-- **Password**: password123
+- Email: demo@demo.com
+- Password: password123
 
 ## Key Features
 - **Search Listings**: Easily search for listings across multiple categories and subcategories.

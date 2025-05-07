@@ -4,9 +4,7 @@
 
 **Demo**: [https://listly.dmbx.workers.dev/](https://listly.dmbx.workers.dev/)
 
-To explore how a verified user dashboard looks, browse pre-created listings, and interact with forms, log in as a demo user:
-- Email: demo@demo.com
-- Password: password123
+🚧 This project is a work in progress — key features are implemented, with UI improvements and code refactoring planned.
 
 ## Key Features
 - **Search Listings**: Easily search for listings across multiple categories and subcategories.

@@ -1,79 +1,41 @@
-# Welcome to React Router!
+# Listly
 
-A modern, production-ready template for building full-stack React applications using React Router.
+**Listly** is a full-stack web application that allows users to buy and sell items.
+**Demo**: [https://listly.dmbx.workers.dev/](https://listly.dmbx.workers.dev/)
 
-## Features
+To explore how a verified user dashboard looks, browse pre-created listings, and interact with forms, log in as a demo user:
+- **Email**: demo@demo.com
+- **Password**: password123
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+## Key Features
+- **Search Listings**: Easily search for listings across multiple categories and subcategories.
+- **Create, Update, and Delete Listings**: Manage listings by adding, editing, or removing them.
+- **Authentication**: Secure login with user roles.
+- **Filtering, Sorting, and Pagination**: Filter and sort listings based on category parameters, and navigate results with pagination.
+- **Image Upload**: Upload images for listings.
 
-## Getting Started
+## Technologies Used
+- React
+- Remix / React Router 7 framework mode
+- D1 (Cloudflare's SQL database)
+- Drizzle ORM
+- Conform
+- Zod
+- R2 (Cloudflare's object storage)
+- Tailwind CSS
+- Cloudflare Workers (for deployment)
 
-### Installation
+## User Roles & Demo Access
+This app includes multiple user roles to ensure safe and flexible interaction:
 
-Install the dependencies:
+| Role        | Description                                                                 |
+|-------------|-----------------------------------------------------------------------------|
+| **admin**   | Full access to manage listings and users.                                  |
+| **user**    | Verified user. Can create, edit, and delete their own listings.            |
+| **unverified** | Default role after signup. Can explore the UI but cannot create, edit, or delete any data. |
+| **demo**    | Pre-created user to explore features. Can view and interact with the UI, but all write actions are disabled. |
 
-```bash
-npm install
-```
-
-### Development
-
-Start the development server with HMR:
-
-```bash
-npm run dev
-```
-
-Your application will be available at `http://localhost:5173`.
-
-## Previewing the Production Build
-
-Preview the production build locally:
-
-```bash
-npm run preview
-```
-
-## Building for Production
-
-Create a production build:
-
-```bash
-npm run build
-```
-
-## Deployment
-
-Deployment is done using the Wrangler CLI.
-
-To build and deploy directly to production:
-
-```sh
-npm run deploy
-```
-
-To deploy a preview URL:
-
-```sh
-npx wrangler versions upload
-```
-
-You can then promote a version to production after verification or roll it out progressively.
-
-```sh
-npx wrangler versions deploy
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+### 💡 How to explore the app
+To explore how a verified user dashboard looks, browse pre-created listings, and interact with forms, log in as a demo user:
+- **Email**: demo@demo.com
+- **Password**: password123

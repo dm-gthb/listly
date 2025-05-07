@@ -13,8 +13,6 @@ import {
   getSessionExpirationDate,
   requireAnonymous,
 } from '~/utils/auth.server';
-import { validateHoneypot } from '~/utils/honeypot.server';
-import { HoneypotInputs } from 'remix-utils/honeypot/react';
 
 const loginSchema = z.object({
   email: z
@@ -28,8 +26,6 @@ const loginSchema = z.object({
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
-  await validateHoneypot(formData);
-
   const submission = await parseWithZod(formData, {
     schema: () =>
       loginSchema.transform(async (data, ctx) => {
@@ -110,7 +106,6 @@ export default function Login({ actionData }: Route.ComponentProps) {
       <div className="mb-4 w-full sm:w-96">
         <div>
           <Form method="POST" {...getFormProps(form)}>
-            <HoneypotInputs />
             <fieldset disabled={false}>
               <div className={classNames.formGroup}>
                 <label htmlFor={fields.email.id}>Email</label>

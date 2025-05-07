@@ -15,8 +15,6 @@ import { db } from './utils/db.server';
 import { getUserWithRolesAndPermissions } from './utils/auth.server';
 import { csrf } from './utils/csrf.server';
 import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
-import { honeypot } from './utils/honeypot.server';
-import { HoneypotProvider } from 'remix-utils/honeypot/react';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -40,14 +38,12 @@ export async function loader({ request }: Route.LoaderArgs) {
   const [csrfToken, cookieHeader] = await csrf.commitToken(request);
   const categories = await db.query.categories.findMany();
   const user = await getUserWithRolesAndPermissions(request);
-  const honeypotInputProps = await honeypot.getInputProps();
-  
+
   return data(
     {
       categories,
       user,
       csrfToken,
-      honeypotInputProps,
     },
     {
       headers: cookieHeader
@@ -76,9 +72,7 @@ export default function AppWithProviders() {
   const loaderData = useLoaderData<typeof loader>();
   return (
     <AuthenticityTokenProvider token={loaderData.csrfToken}>
-      <HoneypotProvider {...loaderData.honeypotInputProps}>
-        <App />
-      </HoneypotProvider>
+      <App />
     </AuthenticityTokenProvider>
   );
 }

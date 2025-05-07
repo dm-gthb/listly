@@ -1,6 +1,6 @@
 import type { Route } from './+types/listing';
 import { db } from '~/utils/db.server';
-import { formatDate } from '~/utils/misc';
+import { formatDate, getImageUrl } from '~/utils/misc';
 import { useOptionalUser } from '~/utils/user';
 import { Link } from 'react-router';
 import { appRoute } from '~/routes';
@@ -61,7 +61,7 @@ export default function Listing({ loaderData }: Route.ComponentProps) {
       <div className="mb-10">
         <h1 className="title mb-1">{title}</h1>
         <p className="title mb-6">US ${sum}</p>
-        <ImageGallery images={images} />
+        <ImageGallery images={images.map(getImageUrl)} />
       </div>
       <h2 className="title">Description from the seller</h2>
       <p className="mb-8">{description}</p>

@@ -2,13 +2,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import { ModalImageGallery } from './modal-image-gallery';
 
-const testImages = [
-  'https://picsum.photos/seed/listing1/600/800',
-  'https://picsum.photos/seed/listing2/1200/800',
-  'https://picsum.photos/seed/listing3/1200/800',
-];
-
-export function ImageGallery({ images = testImages }: { images: string[] }) {
+export function ImageGallery({ images }: { images: string[] }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   return (
     <div className="flex flex-col gap-4 md:flex-row">
@@ -37,7 +31,7 @@ export function ImageGallery({ images = testImages }: { images: string[] }) {
                   prevIndex === 0 ? images.length - 1 : prevIndex - 1,
                 );
               }}
-              className="absolute top-1/2 left-4 flex h-14 w-14 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white"
+              className="absolute top-1/2 left-4 flex h-14 w-14 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-neutral-300 bg-white"
             >
               <ChevronLeftIcon width={24} height={24} />
             </button>
@@ -47,7 +41,7 @@ export function ImageGallery({ images = testImages }: { images: string[] }) {
                   prevIndex === images.length - 1 ? 0 : prevIndex + 1,
                 );
               }}
-              className="absolute top-1/2 right-4 flex h-14 w-14 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white"
+              className="absolute top-1/2 right-4 flex h-14 w-14 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-neutral-300 bg-white"
             >
               <ChevronRightIcon width={24} height={24} />
             </button>

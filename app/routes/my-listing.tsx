@@ -1,7 +1,7 @@
 import { Form, Link, redirect, useActionData } from 'react-router';
 import { db } from '~/utils/db.server';
 import type { Route } from './+types/my-listing';
-import { formatDate, invariantResponse } from '~/utils/misc';
+import { formatDate, invariantResponse, getImageUrl } from '~/utils/misc';
 import { requireUser } from '~/utils/auth.server';
 import { requireUserWithPermission } from '~/utils/permissions.server';
 import { z } from 'zod';
@@ -101,14 +101,15 @@ export default function MyListing({ loaderData }: Route.ComponentProps) {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="title mb-0">{title}</h1>
-      <div className="flex flex-wrap gap-1">
-        {images.map((src, i) => (
-          <img
-            key={src + i}
-            className="block h-[150px]"
-            src={src}
-            alt={`image ${i} of ${title}`}
-          />
+      <div className="flex flex-wrap gap-3">
+        {images.map((imageId, i) => (
+          <a key={imageId} href={getImageUrl(imageId)}>
+            <img
+              className="h-32 w-32 rounded-lg object-cover"
+              src={getImageUrl(imageId)}
+              alt={`image ${i} of ${images.length}`}
+            />
+          </a>
         ))}
       </div>
       <p className="title mb-0">${sum}</p>

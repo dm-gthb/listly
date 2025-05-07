@@ -22,6 +22,12 @@
       "migrations_dir": "./drizzle/migrations",
     },
   ],
+	"r2_buckets": [
+    {
+      "bucket_name": "listly",
+      "binding": "R2"
+    }
+  ],
 	"env": {
     "development": {
       "vars": {

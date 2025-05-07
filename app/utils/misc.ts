@@ -1,3 +1,4 @@
+// import { env } from 'cloudflare:workers';
 import type { Category } from 'drizzle/types';
 
 export function invariantResponse(
@@ -53,4 +54,8 @@ export function prefetchImage(src: string | null) {
     const img = new Image();
     img.src = src;
   }
+}
+
+export function getImageUrl(imageId: string) {
+  return `/resources/images/${imageId}`;
 }

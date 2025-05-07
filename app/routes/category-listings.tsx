@@ -1,7 +1,7 @@
 import { Pagination } from '~/components/pagination';
 import type { Route } from './+types/category-listings';
 import { db } from '~/utils/db.server';
-import { invariantResponse } from '~/utils/misc';
+import { invariantResponse, getImageUrl } from '~/utils/misc';
 import { eq } from 'drizzle-orm';
 import { listings, listingToCategory } from 'drizzle/schema';
 import { Form, Link, redirect, useSearchParams } from 'react-router';
@@ -287,10 +287,10 @@ function ListingCard({ listing }: { listing: Listing }) {
       to={`${appRoute.listing}/${id}`}
       className="group mb-4 gap-4 border-b border-gray-200 p-3 transition-opacity hover:bg-gray-100 lg:mb-0 lg:flex lg:rounded-lg lg:border-none lg:p-8"
     >
-      <div className="mb-2 flex h-[130px] max-w-1/3 min-w-[195px] shrink-0 justify-center overflow-hidden rounded-md bg-gray-100 lg:mb-0">
+      <div className="mb-2 flex aspect-3/2 h-[130px] max-w-1/3 shrink-0 justify-center overflow-hidden rounded-md bg-gray-100 lg:mb-0">
         <img
-          className="max-h-full max-w-full object-fill object-center"
-          src={images[0]}
+          className="object-cover"
+          src={getImageUrl(images[0])}
           alt={`${title} image`}
         />
       </div>

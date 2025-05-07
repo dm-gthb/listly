@@ -22,17 +22,19 @@ import { useState } from 'react';
 import { useReadOnlyUserRole } from '~/utils/user';
 import { UserRoleAlert } from '~/components/user-role-alert';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
-import {
-  CloudArrowDownIcon,
-  XMarkIcon,
-  PlusIcon,
-} from '@heroicons/react/24/outline';
+import { CloudArrowDownIcon, XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { getImageUrl } from '~/utils/misc';
 
 const ImageFieldsetSchema = z.object({
-  id: z.string().optional(),
+  existingImageId: z.string().optional(),
   file: z
-    .instanceof(File)
-    .refine((file) => file.size < 700 * 1024, 'Image size must be less than 700KB')
+    .union([z.instanceof(File), z.string()])
+    .refine((file) => {
+      if (file instanceof File) {
+        return file.size < 700 * 1024;
+      }
+      return true;
+    }, 'Image size must be less than 700KB')
     .optional(),
 });
 
@@ -108,7 +110,7 @@ export function ListingEditorForm({
       categoryId: listing?.categories?.[0].categoryId ?? '',
       condition: listing?.condition ?? '',
       images: listing?.images.length
-        ? listing.images.map((image) => ({ id: image }))
+        ? listing.images.map((image) => ({ existingImageId: image }))
         : [{}],
       ...listing?.listingAttributes.reduce(
         (acc, attr) => {
@@ -135,10 +137,10 @@ export function ListingEditorForm({
           {listing ? <input type="hidden" name="id" value={listing.id} /> : null}
           <button type="submit" className="hidden" />
           <div className="mb-10 flex flex-col gap-3">
-            <div className="flex flex-col gap-1">
+            <div className="mb-6 flex flex-col gap-1">
               <span>Images</span>
               <div className="flex flex-wrap gap-3">
-                <ul className="flex flex-wrap items-center gap-3">
+                <ul className="flex flex-wrap items-start gap-3">
                   {imageList.map(
                     (image: FieldMetadata<ImageFieldsetType>, index: number) => (
                       <li key={image.key} className="relative">
@@ -156,24 +158,20 @@ export function ListingEditorForm({
                       </li>
                     ),
                   )}
+                  {imageList.length < 5 && (
+                    <button
+                      {...form.insert.getButtonProps({ name: fields.images.name })}
+                      className="group flex h-32 w-32 cursor-pointer items-center justify-center rounded-lg border border-gray-200 focus-within:border-gray-300 hover:border-gray-300 hover:text-gray-700"
+                    >
+                      <span className="sr-only">Add image</span>
+                      <PlusIcon
+                        width={32}
+                        height={32}
+                        className="transition-transform group-hover:scale-125"
+                      />
+                    </button>
+                  )}
                 </ul>
-                {imageList.length < 5 && (
-                  <button
-                    {...form.insert.getButtonProps({ name: fields.images.name })}
-                    className="group flex h-32 w-32 cursor-pointer items-center justify-center rounded-lg border border-gray-200 focus-within:border-gray-300 hover:border-gray-300 hover:text-gray-700"
-                  >
-                    <span className="sr-only">Add image</span>
-                    <PlusIcon
-                      width={32}
-                      height={32}
-                      className="transition-transform group-hover:scale-125"
-                    />
-                  </button>
-                )}
-              </div>
-
-              <div className="mt-1 min-h-6">
-                <FormErrorList id={fields.file.id} errors={fields.file.errors} />
               </div>
             </div>
 
@@ -332,56 +330,56 @@ export function ListingEditorForm({
 function ImageChooser({ meta }: { meta: FieldMetadata<ImageFieldsetType> }) {
   const fields = meta.getFieldset();
   const [previewImage, setPreviewImage] = useState<string | null>(
-    fields.id.initialValue ?? null,
+    fields.existingImageId.initialValue ?? null,
   );
-  const existingImage = Boolean(fields.id.initialValue);
+
+  const existingImage = Boolean(fields.existingImageId.initialValue);
 
   return (
     <fieldset {...getFieldsetProps(meta)}>
-      <div className="flex gap-3">
-        <div className="w-32">
-          <div className="relative h-32 w-32">
-            <label
-              htmlFor="image-input"
-              className={`absolute h-32 w-32 rounded-lg text-gray-600 ${!previewImage ? 'border border-gray-200 focus-within:border-gray-300 hover:border-gray-300 hover:text-gray-700' : ''} ${!existingImage ? 'cursor-pointer focus-within:ring-2' : ''}`}
-            >
-              {previewImage ? (
-                <div>
-                  <img
-                    src={previewImage}
-                    alt={''}
-                    className="h-32 w-32 rounded-lg object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="flex h-32 w-32 items-center justify-center rounded-lg">
-                  <CloudArrowDownIcon width={32} height={32} />
-                </div>
-              )}
-              {existingImage && (
-                <input {...getInputProps(fields.id, { type: 'hidden' })} />
-              )}
-              <input
-                className="absolute top-0 left-0 z-0 h-32 w-32 cursor-pointer opacity-0"
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
+      <div className="w-32">
+        <div className="relative mb-1 h-32 w-32">
+          <label
+            htmlFor="image-input"
+            className={`absolute h-32 w-32 rounded-lg text-gray-600 ${!previewImage ? 'border border-gray-200 focus-within:border-gray-300 hover:border-gray-300 hover:text-gray-700' : ''} ${!existingImage ? 'cursor-pointer focus-within:ring-2' : ''}`}
+          >
+            {previewImage ? (
+              <div>
+                <img
+                  src={existingImage ? getImageUrl(previewImage) : previewImage}
+                  alt=""
+                  className="h-32 w-32 rounded-lg object-cover"
+                />
+              </div>
+            ) : (
+              <div className="flex h-32 w-32 items-center justify-center rounded-lg">
+                <CloudArrowDownIcon width={32} height={32} />
+              </div>
+            )}
+            {existingImage && (
+              <input {...getInputProps(fields.existingImageId, { type: 'hidden' })} />
+            )}
+            <input
+              className="absolute top-0 left-0 z-0 h-32 w-32 cursor-pointer opacity-0"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
 
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setPreviewImage(reader.result as string);
-                    };
-                    reader.readAsDataURL(file);
-                  } else {
-                    setPreviewImage(null);
-                  }
-                }}
-                accept="image/*"
-                {...getInputProps(fields.file, { type: 'file' })}
-              />
-            </label>
-          </div>
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    setPreviewImage(reader.result as string);
+                  };
+                  reader.readAsDataURL(file);
+                } else {
+                  setPreviewImage(null);
+                }
+              }}
+              accept="image/*"
+              {...getInputProps(fields.file, { type: 'file' })}
+            />
+          </label>
         </div>
+        <FormErrorList id={fields.file.errorId} errors={fields.file.errors} />
       </div>
     </fieldset>
   );

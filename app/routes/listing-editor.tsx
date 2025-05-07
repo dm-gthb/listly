@@ -7,10 +7,25 @@ import { appRoute } from '~/routes';
 import { requireUserWithPermission } from '~/utils/permissions.server';
 import { getListingSchema } from './listing-editor-form';
 import { validateCSRF } from '~/utils/csrf.server';
+import { type FileUpload, parseFormData } from '@mjackson/form-data-parser';
+import { invariantResponse } from '~/utils/misc';
 
-export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
+export async function action({ request, context }: ActionFunctionArgs) {
+  async function uploadHandler(fileUpload: FileUpload) {
+    if (fileUpload.type.split('/')[0] === 'image') {
+      const storageKey = `${crypto.randomUUID()}`;
+      const arrayBuffer = await fileUpload.arrayBuffer();
+      await context.cloudflare.env.R2.put(storageKey, arrayBuffer);
+      return storageKey;
+    }
+  }
+  const formData = await parseFormData(request, uploadHandler);
+  console.log('formData');
+  console.log(formData);
+
   await validateCSRF(formData, request.headers);
+
+  console.log('validateCSRF done');
 
   const categoryId = Number(formData.get('categoryId'));
   const categoryAttrs = await db.query.categoryToAttribute.findMany({
@@ -29,8 +44,9 @@ export async function action({ request }: ActionFunctionArgs) {
   const submission = parseWithZod(formData, {
     schema,
   });
-
+  console.log('parseWithZod done');
   if (submission.status !== 'success') {
+    console.log('submission.status !== success');
     return submission.reply();
   }
 
@@ -41,6 +57,7 @@ export async function action({ request }: ActionFunctionArgs) {
     sum,
     categoryId: newCategoryId,
     condition,
+    images,
     ...attrs
   } = submission.value;
 
@@ -50,7 +67,38 @@ export async function action({ request }: ActionFunctionArgs) {
     isUpdate ? 'update:listing:own' : 'create:listing:own',
   );
 
+  const newImages = Array.isArray(images)
+    ? (images
+        .map((image) => {
+          const value = Object.values(image)[0];
+          if (typeof value === 'string') {
+            return value;
+          }
+          return null;
+        })
+        .filter(Boolean) as string[])
+    : [];
+
   if (isUpdate) {
+    const currentListing = await db.query.listings.findFirst({
+      where: eq(listings.id, Number(id)),
+    });
+
+    invariantResponse(currentListing, 'Listing not found', { status: 404 });
+
+    const currentImages = currentListing.images;
+    const imagesToDelete = currentImages.filter((image) => !newImages.includes(image));
+
+    await Promise.all(
+      imagesToDelete.map(async (img) => {
+        try {
+          await context.cloudflare.env.R2.delete(img);
+        } catch (error) {
+          console.error(`Failed to delete image ${img}:`, error);
+        }
+      }),
+    );
+
     await db
       .update(listings)
       .set({
@@ -59,10 +107,10 @@ export async function action({ request }: ActionFunctionArgs) {
         sum: Number(sum),
         updatedAt: new Date().toISOString(),
         ownerId: user.id,
+        images: newImages,
       })
       .where(eq(listings.id, Number(id)));
 
-    // Update category todo:if changed
     await db.delete(listingToCategory).where(eq(listingToCategory.listingId, Number(id)));
     await db.insert(listingToCategory).values({
       listingId: Number(id),
@@ -93,7 +141,7 @@ export async function action({ request }: ActionFunctionArgs) {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       ownerId: user.id,
-      images: [`https://picsum.photos/seed/600/400`],
+      images: newImages,
     })
     .returning();
 

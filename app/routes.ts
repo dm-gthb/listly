@@ -31,4 +31,5 @@ export default [
     ]),
   ]),
   route(appRoute.myListingComments, 'routes/my-listings-comments.tsx'),
+  route('/resources/images/:imageId', 'routes/resources/images.ts'),
 ] satisfies RouteConfig;

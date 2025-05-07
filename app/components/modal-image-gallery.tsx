@@ -121,7 +121,7 @@ function ImageGallery({
           <button
             ref={buttonPrevRef}
             onClick={setPreviousImage}
-            className="absolute top-1/2 left-2 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-white px-1 py-3 text-gray-700 sm:left-4 xl:left-10"
+            className="absolute top-1/2 left-2 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-neutral-300 bg-white px-1 py-3 text-gray-700 sm:left-4 xl:left-10"
           >
             <ChevronLeftIcon width={24} height={24} />
             <span className="sr-only">Show previous image</span>
@@ -129,7 +129,7 @@ function ImageGallery({
           <button
             ref={buttonNextRef}
             onClick={setNextImage}
-            className="absolute top-1/2 right-2 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-white px-1 py-3 text-gray-700 sm:right-4 xl:right-10"
+            className="absolute top-1/2 right-2 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-neutral-300 bg-white px-1 py-3 text-gray-700 sm:right-4 xl:right-10"
           >
             <ChevronRightIcon width={24} height={24} />
             <span className="sr-only">Show next image</span>
